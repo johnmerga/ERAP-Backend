@@ -1,0 +1,1 @@
+export { IUser, UserModel } from './user.model';
