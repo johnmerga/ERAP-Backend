@@ -1,1 +1,0 @@
-export { newUserValidator } from './user.validator';
