@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Logger } from '../logger';
 import { UserService } from '../service/user';
-import { newUserValidator } from "../validator"
+import { newUserValidator } from "../validator/user"
 import { ApiError } from '../errors';
 import { catchAsync } from '../utils';
 import httpStatus from 'http-status';

@@ -1,0 +1,7 @@
+
+export enum USER_STATUS {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    DELETED = 'DELETED',
+    PENDING = 'PENDING'
+}

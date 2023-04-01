@@ -1,6 +1,6 @@
 import express, { Express, NextFunction,Request,Response } from 'express';
 import { morganMiddleware } from './logger';
-import { UserRouter } from './router/user';
+import { UserRouter,AuthRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
@@ -22,6 +22,8 @@ class App {
     constructor() {
         this.app = express();
         this.config();
+        //auth routes
+        this.app.use('/api/v1/auth', new AuthRouter().routes())
         // user routes
         this.app.use('/api/v1/users', new UserRouter().routes());
 
@@ -46,24 +48,3 @@ class App {
 }
 
 export default new App().app;
-
-
-// this.app.use(session({
-    //     secret: 'secret',
-    //     resave: false,
-    //     saveUninitialized: false,
-    //     store: new MongoStore({
-        //         mongoUrl: mongoUrl,
-        //         collection: 'sessions'
-        
-        //     }),
-        //     cookie: {
-            //         maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-            //     }
-            
-            // }))
-            // error converter
-            // private errorHandling() {
-            //     this.app.use(errorConverter);
-            //     this.app.use(errorHandler);
-            // }

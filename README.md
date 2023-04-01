@@ -65,7 +65,12 @@ The following tools were used in this project:
 
 ## Requirements ##
 
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Node](https://nodejs.org/en/) and [MongoDB](https://mongodb.com)  installed.
+Before starting , you need to have 
+- [ ] [Git](https://git-scm.com) 
+- [ ] [Node](https://nodejs.org/en/) 
+- [ ] [MongoDB](https://mongodb.com) installed.
+
+`run mongodb `
 
 ## Starting ##
 
@@ -73,8 +78,14 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) an
 # Clone this project
 $ git clone https://github.com/johnmerga/erap-backend
 
+# install typescript globally if it's not installed
+$ npm install -g typescript
+
 # Access
 $ cd erap-backend
+
+# create .env file
+$ cp .env.example .env
 
 # Install dependencies
 $ npm install

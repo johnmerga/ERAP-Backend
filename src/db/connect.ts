@@ -4,17 +4,36 @@ import logger from "../logger/logger";
 
 
 export const connect = async () => {
-    try {
-        logger.info("Connecting to MongoDB...");
-        await mongoose.connect(`${config.mongoose.url}/${config.mongoose.dbName}`, {
-            connectTimeoutMS: 5000,
-            
-        });
-        logger.info("Connected to MongoDB");
-    } catch (error) {
-        logger.error("Could not connect to MongoDB");
-        // logger.error(error);
-        process.exit(1);
-    }
+    await mongoose.connect(`${config.mongoose.url}/${config.mongoose.dbName}`, {});
 }
+
+mongoose.connection.on('connecting', function () {
+    logger.info('Connecting to MongoDB')
+})
+
+mongoose.connection.on('error', function () {
+    logger.error("Could not connect to MongoDB");
+    process.exit(1);
+})
+
+mongoose.connection.on('connected', function () {
+    logger.info("MongoDB Connected")
+})
+
+mongoose.connection.on('reconnected', function () {
+    console.log('MongoDB reconnected!');
+});
+
+
+mongoose.connection.on('disconnected', function () {
+    logger.error("MongoDB Disconnected");
+
+})
+
+
+// Close the Mongoose connection, when receiving SIGINT
+process.on('SIGINT', function () {
+    mongoose.connection.close(true)
+
+});
 
