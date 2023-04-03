@@ -7,6 +7,7 @@ import { Role } from './user.roles';
 import { ApiError } from '../../errors';
 import httpStatus from 'http-status';
 import { USER_STATUS } from './user.status';
+import { toJSON, paginate } from '../../utils'
 
 
 
@@ -69,6 +70,9 @@ const UserSchema = new Schema<IUser, UserModel>({
     },
 })
 
+UserSchema.plugin(toJSON)
+UserSchema.plugin(paginate)
+
 UserSchema.pre('save', async function (next) {
     const user = this;
     if (user.isModified('password')) {
@@ -82,6 +86,13 @@ UserSchema.statics.isEmailTaken = async function (email: string, excludeUserId?:
     const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
     return !!user;
 }
+// check if the password is correct using schema.methods
+UserSchema.methods.isPasswordMatch = async function (password: string) {
+    const user = this;
+    return bcrypt.compare(password, user.password);
+}
+
+
 export const User = model<IUser, UserModel>('User', UserSchema);
 
 

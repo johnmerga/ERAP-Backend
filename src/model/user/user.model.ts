@@ -1,4 +1,5 @@
 import mongoose, { Model, Document } from "mongoose";
+import { QueryResult } from "../../utils";
 
 export interface IUser {
     name: string;
@@ -15,13 +16,16 @@ export interface IUser {
     updatedAt: Date;
 }
 
-export interface IUserDoc extends IUser, Document { }
+export interface IUserDoc extends IUser, Document {
+    isPasswordMatch(password: string): Promise<boolean>;
+}
 
-export type NewUser = Omit<IUser, 'isVerified' | 'status' | 'orgId'>
+export type NewUser = Omit<IUser, 'isVerified' | 'status' | 'orgId' | 'createdAt' | 'updatedAt' | 'permissions'>
 
 export type UpdateUserBody = Partial<IUser>
 
 export interface UserModel extends Model<IUserDoc> {
     isEmailTaken(email: string): Promise<boolean>;
+    paginate(filter: Record<string, any>, options: Record<string, any>): Promise<QueryResult>;
 }
 
