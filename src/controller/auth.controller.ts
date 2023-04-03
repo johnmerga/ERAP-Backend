@@ -1,19 +1,17 @@
 import { Request, Response } from "express"
+import { catchAsync } from "../utils"
+import { AuthService } from "../service/auth/auth.service"
 
 
-export class Auth {
-
-    public static registerUser(req: Request, res: Response) {
-
-        res.status(201).send("check successful")
+export class AuthController {
+    private authService: AuthService;
+    constructor() {
+        this.authService = new AuthService()
     }
 
-    public static loginUser(req: Request, res: Response) {
-        res.status(200).send("check succeed")
-
-    }
-    public static logoutUser(req: Request, res: Response) {
-
-    }
-
+    public login = catchAsync(async (req: Request, res: Response) => {
+        const { email, password } = req.body;
+        const user = await this.authService.loginWithEmailAndPassword(email, password);
+        res.send(user)
+    })
 }
