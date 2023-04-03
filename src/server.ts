@@ -4,6 +4,9 @@ import * as db from "./db/connect";
 import app from "./app";
 
 import events from "events"
+import http from "http"
+
+let server = http.createServer(app);
 
 
 const workflow = new events.EventEmitter();
@@ -20,13 +23,19 @@ workflow.on('connectDB', async () => {
 });
 
 workflow.on('startServer', () => {
-    app.listen(config.port, () => {
-        Logger.info(`Server is running on URL: http://localhost:${config.port} `);
-
-    });
+    server.listen(config.port, () => {
+        Logger.info(`Server is running on port ${config.port}`);
+    }
+    );
 
 });
 
 workflow.emit('connectDB');
+
+process.on('SIGINT', (code) => {
+    Logger.info(`Server is shutting down with code: ${code}`);
+    server.close();
+    process.exit(0);
+})
 
 
