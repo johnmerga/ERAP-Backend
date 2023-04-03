@@ -3,8 +3,8 @@ import { User, IUserDoc, NewUser, UpdateUserBody } from "../model/user"
 import { UserDal } from "../dal";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
-import { IUser } from "../model/user";
 import mongoose from "mongoose";
+import { IOptions, QueryResult } from "../utils";
 
 
 export class UserService {
@@ -12,17 +12,19 @@ export class UserService {
     constructor() {
         this.userDal = new UserDal();
     }
+
     /* check email */
     public async isEmailTaken(email: string): Promise<boolean> {
         return User.isEmailTaken(email);
     }
+
     /* create user */
-    public async create(user: NewUser): Promise<IUserDoc> {
+    public async create(userBody: NewUser): Promise<IUserDoc> {
         // check if email is taken
-        if (await this.isEmailTaken(user.email)) {
+        if (await this.isEmailTaken(userBody.email)) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
         }
-        return this.userDal.create(user);
+        return this.userDal.create(userBody);
     }
     /* get user  */
     public async findUserById(id: string): Promise<IUserDoc | null> {
@@ -32,15 +34,17 @@ export class UserService {
     public async findUserByEmail(email: string): Promise<IUserDoc | null> {
         return User.findOne({ email });
     }
+    /* Query for users */
+    public async queryUsers(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
 
-    public async findUsers(query: Record<string, unknown>): Promise<IUser[]> {
-        return await this.userDal.findUsers(query);
+        const users = await User.paginate(filter, options)
+        return users
+
     }
 
     /* update user */
 
     public async updateUserById(id: string, updateBody: UpdateUserBody): Promise<IUserDoc> {
-
         let user = await this.findUserById(id)
         if (!user) {
             throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
@@ -50,13 +54,12 @@ export class UserService {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
         }
         Object.assign(user, updateBody)
-        user = await new UserDal().updateUser(user._id, user)
-
+        user = await this.userDal.updateUser(new mongoose.Types.ObjectId(id), user)
         return user
     }
-
+    /* delete user */
     public async deleteUserById(id: string): Promise<IUserDoc> {
-        return await new UserDal().deleteUser(new mongoose.Types.ObjectId(id))
+        return await this.userDal.deleteUser(new mongoose.Types.ObjectId(id));
     }
 
 
