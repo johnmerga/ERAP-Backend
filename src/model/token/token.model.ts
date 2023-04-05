@@ -17,7 +17,7 @@ export interface ITokenModel extends Model<ITokenDoc> { }
 
 export interface IPayload extends JwtPayload {
     sub: string;
-    roles: [string];
+    roles: string[];
     iat: number;
     exp: number;
     type: string;

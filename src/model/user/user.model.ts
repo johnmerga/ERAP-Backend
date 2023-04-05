@@ -7,7 +7,7 @@ export interface IUser {
     password: string;
     address: string;
     phone: string;
-    roles: [string];
+    roles: string[];
     permissions: [mongoose.Types.ObjectId];
     orgId: mongoose.Types.ObjectId
     isVerified: boolean;
