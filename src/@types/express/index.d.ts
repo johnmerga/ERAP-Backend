@@ -1,11 +1,13 @@
 import express from "express"
+import { IUserDoc } from "../../model/user"
 
 
 declare global {
     namespace Express {
       interface Request {
-        user?: Record<string,any>,
-        token?: string
+        user?: IUserDoc,
+        token?: string,
+        permissions?: string[]
       }
     }
   }
