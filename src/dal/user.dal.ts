@@ -21,7 +21,8 @@ export class UserDal {
             })
 
 
-        return newUser;
+
+        return (await newUser).save();
     }
 
     async findUser(query: Record<string, unknown>): Promise<IUserDoc> {

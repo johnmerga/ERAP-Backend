@@ -1,48 +1,30 @@
-
-import { ITokenDoc, Token, TokenQuery } from "../model/token"
-import { ApiError } from "../errors";
-import httpStatus from "http-status";
-
-
+import { ITokenDoc, NewToken, Token, TokenQuery } from "../model/token"
 
 export class TokenDal {
     // create a new token
-    async createToken(newToken: Object): Promise<ITokenDoc> {
-        const token = new Token(newToken).save()
-            .then(function (token: ITokenDoc) {
-                return token
-            })
-            // @ts-ignore
-            .catch(function (err: any) {
-                // handle error
-                throw new ApiError(httpStatus.BAD_REQUEST, err);
-
-            })
-
-        return token;
-
+    async createToken(newToken: NewToken): Promise<ITokenDoc> {
+        const token = await new Token(newToken).save()
+        if (!token) throw new Error('error occured while saving the token to database')
+        return token
     }
 
     // find a token
-    async findToken(query: TokenQuery): Promise<ITokenDoc> {
-        const foundToken = Token.findOne(query)
-            .then(function (token) {
-                return token as ITokenDoc
-            }
-            )
-            .catch(function (err) {
-                // handle error
-                throw new ApiError(httpStatus.BAD_REQUEST, "Token not found");
-
-            }
-            )
-
-        return foundToken;
-
+    async findToken(filter: TokenQuery): Promise<ITokenDoc> {
+        const token = await Token.findOne(filter)
+        if (!token) throw new Error('Token not found')
+        return token
     }
 
-    // update a token
-    // async updateToken(query: TokenQuery, update: IToken): Promise<ITokenDoc | null> {}
+    // delete a token
+    async deleteToken(filter: TokenQuery): Promise<ITokenDoc> {
+        const token = await Token.findOneAndDelete(filter)
+        if (!token) throw new Error("there's no token to delete")
+        return token
+    }
+    async deleteTokens(filter: TokenQuery) {
+        const token = await Token.deleteMany(filter)
+        if (!token) throw new Error("there's no token to delete")
+        return
+    }
 
 }
-

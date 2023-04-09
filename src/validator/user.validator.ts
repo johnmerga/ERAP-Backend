@@ -11,7 +11,6 @@ const createUserBody: Record<keyof NewUser, any> = {
     password: joi.string().required().custom(password),
     address: joi.string().required(),
     phone: joi.string().required(),
-    roles: joi.array().items(joi.string()).required().default(['user'])
 
 }
 
