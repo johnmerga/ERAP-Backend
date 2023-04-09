@@ -15,6 +15,8 @@ const envVarsSchema = joi.object({
     JWT_SECRET: joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: joi.number().default(30).description('days after which refresh tokens expire'),
+    JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which verify email tokens expire'),
+    JWT_RESET_PASSWORD_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which reset password tokens expire'),
     BASE_URL: joi.string().required().description('Base url for the application').default('http://localhost:3000'),
     SMTP_HOST: joi.string().required().description('server that will send the emails'),
     SMTP_PORT: joi.number().required().description('port to connect to the email server'),
@@ -51,18 +53,22 @@ const config = {
         secret: envVars.JWT_SECRET,
         accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
         refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
+        verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+        resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     },
     /* email */
     email: {
-        
+
         smtp: {
             host: envVars.SMTP_HOST,
             port: envVars.SMTP_PORT,
             auth: {
                 user: envVars.SMTP_USER,
                 pass: envVars.SMTP_PASS,
-            }
+            },
+            secure: envVars.SMTP_PORT === 465 ? true : false,
         },
+        emailFrom: envVars.EMAIL_FROM,
     },
     /*  */
     baseUrl: envVars.BASE_URL,
