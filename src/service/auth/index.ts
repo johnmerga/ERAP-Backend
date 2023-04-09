@@ -1,1 +1,2 @@
-export { generateToken, verifyToken } from "./auth.jwt"
+export { AuthService } from "./auth.service"
+export { authenticateMiddleware, authorizeMiddleware } from "./auth.middleware"
