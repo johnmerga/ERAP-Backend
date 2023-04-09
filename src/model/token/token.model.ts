@@ -1,8 +1,9 @@
 import { JwtPayload } from "jsonwebtoken";
+import { Moment } from "moment";
 import { Model, Document } from "mongoose"
 
 
-export interface IToken  {
+export interface IToken {
     token: string;
     user: string;
     type: string;
@@ -22,20 +23,20 @@ export interface IPayload extends JwtPayload {
     exp: number;
     type: string;
 }
-
+export interface INewPayload {
+    sub: string;
+    roles: string[];
+    type: string;
+    exp: Moment;
+}
 export interface TokenPayload {
     token: string;
     expires: Date;
 }
 
+export type TokenQuery = Partial<IToken>
+
 export interface AccessAndRefreshTokens {
     access: TokenPayload;
     refresh: TokenPayload;
-}
-
-export type TokenQuery = {
-    token: string;
-    type: string;
-    user: string;
-    blacklisted?: boolean;
 }

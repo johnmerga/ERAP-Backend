@@ -58,6 +58,7 @@ const UserSchema = new Schema<IUser, UserModel>({
     status: {
         type: String,
         enum: Object.values(USER_STATUS),
+        default: USER_STATUS.PENDING
     }
     ,
     createdAt: {

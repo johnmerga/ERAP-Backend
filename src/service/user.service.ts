@@ -1,5 +1,5 @@
 // import { IUser, UserModel } from "../model/user"
-import { User, IUserDoc, NewUser, UpdateUserBody } from "../model/user"
+import { User, IUserDoc, NewUser, NewAdmin, UpdateUserBody } from "../model/user"
 import { UserDal } from "../dal";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
@@ -17,6 +17,16 @@ export class UserService {
     public async isEmailTaken(email: string): Promise<boolean> {
         return User.isEmailTaken(email);
     }
+    /*register admin  */
+    public async registerAdmin(userBody: NewAdmin): Promise<IUserDoc> {
+        // check if email is taken
+        if (await this.isEmailTaken(userBody.email)) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+        }
+        Object.assign(userBody, { roles: ['admin'] })
+        return this.userDal.create(userBody);
+    }
+
 
     /* create user */
     public async create(userBody: NewUser): Promise<IUserDoc> {
@@ -27,12 +37,20 @@ export class UserService {
         return this.userDal.create(userBody);
     }
     /* get user  */
-    public async findUserById(id: string): Promise<IUserDoc | null> {
-        return User.findById(new mongoose.Types.ObjectId(id));
+    public async findUserById(id: string): Promise<IUserDoc> {
+        const user = await User.findById(new mongoose.Types.ObjectId(id));
+        if (!user) {
+            throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+        }
+        return user;
     }
 
-    public async findUserByEmail(email: string): Promise<IUserDoc | null> {
-        return User.findOne({ email });
+    public async findUserByEmail(email: string): Promise<IUserDoc> {
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error('User not found')
+        }
+        return user;
     }
     /* Query for users */
     public async queryUsers(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
