@@ -6,15 +6,6 @@ import { UserRouter, AuthRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
-// import session from 'express-session'
-// const MongoStore = require('connect-mongo')
-
-// const mongoUrl = `${process.env.MONGO_URL}/${process.env.MONGO_DB_NAME}`;
-
-// const sessionStore = new MongoStore({
-//     mongooseConnection: mongoUrl,
-//     collection: 'sessions'
-// })
 
 class App {
     public app: Express;
@@ -31,7 +22,7 @@ class App {
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {
-            next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+            next(new ApiError(httpStatus.NOT_FOUND, 'unknown route'));
         });
         // error converter
         this.app.use(errorConverter);

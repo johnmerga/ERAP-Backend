@@ -6,66 +6,46 @@ export class PermissionDal {
 
     async create(permission: IPermission): Promise<IPermissionDoc> {
 
-        const newPermission = new Permission(permission).save()
-            .then(function (permission) {
-                return permission
-            })
-            .catch(function (err) {
-                // handle error
-                throw new ApiError(httpStatus.BAD_REQUEST, err);
+        try {
+            const newPermission = new Permission(permission)
+            return await newPermission.save()
 
-            })
-
-        return newPermission;
-
+        } catch (error) {
+            throw new ApiError(httpStatus.BAD_REQUEST, "Error occured while creating permission");
+        }
     }
     // find one permission
     async findPermission(query: Record<string, any>): Promise<IPermissionDoc> {
-        const permission = Permission.findOne(query)
-            .then(function (permission) {
-
-                return permission as IPermissionDoc
-            }
-            )
-            .catch(function (err) {
-                // handle error
-                throw new ApiError(httpStatus.BAD_REQUEST, "Permission not found");
-
-            }
-            )
-        return permission;
+        try {
+            const permission = await Permission.findOne(query)
+            if (!permission) throw new ApiError(httpStatus.BAD_REQUEST, "Permission not found");
+            return permission
+        } catch (error) {
+            throw new ApiError(httpStatus.BAD_REQUEST, "Error occured while finding permission");
+        }
     }
     // find all permissions
     async findPermissions(filter: Record<string, any>): Promise<IPermissionDoc[]> {
-        const foundPermissions = Permission.find(filter).then(function (permissions) {
-            return permissions as IPermissionDoc[]
+        try {
+            const foundPermissions = await Permission.find(filter)
+            if (!foundPermissions) throw new ApiError(httpStatus.BAD_REQUEST, "No permissions found")
+            return foundPermissions
+        } catch (error) {
+            throw new ApiError(httpStatus.BAD_REQUEST, "Error occured while finding permissions");
         }
-        )
-            .catch(function (err) {
-                // handle error
-                throw new ApiError(httpStatus.BAD_REQUEST, "Permission not found");
-
-            }
-            )
-        return foundPermissions;
 
     }
 
     // delete one permission
 
     async deletePermission(filter: Record<string, any>): Promise<IPermissionDoc> {
-        const deletedPermission = Permission.findOneAndDelete(filter).then(function (permission) {
-            return permission as IPermissionDoc
+        try {
+            const deletedPermission = await Permission.findOneAndDelete(filter)
+            if (!deletedPermission) throw new ApiError(httpStatus.BAD_REQUEST, "Permission not found to delete")
+            return deletedPermission
+        } catch (error) {
+            throw new ApiError(httpStatus.BAD_REQUEST, "Error occured while deleting permission");
         }
-        )
-            .catch(function (err) {
-                // handle error
-                throw new ApiError(httpStatus.BAD_REQUEST, "Permission not found");
-
-            }
-            )
-        return deletedPermission;
-
     }
 
 
