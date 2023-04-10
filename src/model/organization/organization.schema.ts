@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { IOrganization, OrganizationModel } from './organization.model';
-import { toJSON } from '../../utils'
+import { toJSON, paginate } from '../../utils'
 
 const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
     name: {
@@ -16,7 +16,8 @@ const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
         required: true,
     },
     capital: {
-        type: Number
+        type: Number,
+        required: true,
     },
     sector: {
         type: String,
@@ -37,6 +38,7 @@ const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
     },
     address: {
         type: Schema.Types.ObjectId,
+        required: true,
         ref: 'Address'
     },
     rating: {
@@ -54,6 +56,7 @@ const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
 
 // Remove : not sure if we need this
 OrganizationSchema.plugin(toJSON)
+OrganizationSchema.plugin(paginate)
 
 // check if the name is already in use using schema.statics
 OrganizationSchema.statics.isNameTaken = async function (name: string, excludeUserId?: string) {

@@ -1,13 +1,13 @@
 import mongoose, { HydratedDocument } from "mongoose";
 
-import { UpdateOrgBody, Organization, IOrganizationDoc, OrganizationModel } from "../model/organization";
+import { UpdateOrgBody, Organization, IOrganizationDoc, NewOrg } from "../model/organization";
 import { ApiError } from "../errors"
 import httpStatus from "http-status";
 
 
 export class OrgDal {
 
-    async create(org: OrganizationModel): Promise<HydratedDocument<IOrganizationDoc>> {
+    async create(org: NewOrg): Promise<HydratedDocument<IOrganizationDoc>> {
 
         const newOrg = new Organization(org).save()
             .then(function (org) {

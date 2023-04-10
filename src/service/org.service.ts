@@ -1,4 +1,4 @@
-import { IOrganization, OrganizationModel, IOrganizationDoc, UpdateOrgBody, Organization } from "../model/organization"
+import { IOrganizationDoc, UpdateOrgBody, Organization, NewOrg } from "../model/organization"
 import { OrgDal } from "../dal";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
@@ -20,69 +20,62 @@ export class OrgService {
     public async isTinNumberTaken(TinNumber: string): Promise<boolean> {
         return Organization.isTinNumberTaken(TinNumber);
     }
-    /*register admin  */
-    public async registerAdmin(userBody: NewAdmin): Promise<IUserDoc> {
-        // check if email is taken
-        if (await this.isEmailTaken(userBody.email)) {
-            throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+
+    /* get all organization  */
+    public async queryOrgs(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
+
+        const orgs = await Organization.paginate(filter, options)
+        return orgs
+
+    }  
+    /*get org by type  */
+    public async findOrgByType(type: string): Promise<IOrganizationDoc> {
+        const org = await Organization.findOne({type});
+        if (!org) {
+            throw new ApiError(httpStatus.NOT_FOUND, 'Organization not found');
         }
-        Object.assign(userBody, { roles: ['admin'] })
-        return this.userDal.create(userBody);
+        return org;
     }
 
-
-    /* create user */
-    public async create(userBody: NewUser): Promise<IUserDoc> {
-        // check if email is taken
-        if (await this.isEmailTaken(userBody.email)) {
-            throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    /* get org by id  */
+    public async findOrgById(id: string): Promise<IOrganizationDoc> {
+        const org = await Organization.findById(new mongoose.Types.ObjectId(id));
+        if (!org) {
+            throw new ApiError(httpStatus.NOT_FOUND, 'Organization not found');
         }
-        return this.userDal.create(userBody);
+        return org;
     }
-    /* get user  */
-    public async findUserById(id: string): Promise<IUserDoc> {
-        const user = await User.findById(new mongoose.Types.ObjectId(id));
-        if (!user) {
-            throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+
+    /* register org */
+    public async create(orgBody: NewOrg): Promise<IOrganizationDoc> {
+        // check if name is taken
+        if (await this.isNameTaken(orgBody.name)) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Name is already taken');
         }
-        return user;
-    }
-
-    public async findUserByEmail(email: string): Promise<IUserDoc> {
-        const user = await User.findOne({ email });
-        if (!user) {
-            throw new Error('User not found')
+        // check if Tin Number is taken
+        if (await this.isTinNumberTaken(orgBody.tinNo)) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Tin Number is already taken');
         }
-        return user;
+        return this.orgDal.create(orgBody);
     }
-    /* Query for users */
-    public async queryUsers(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
+    
+    /* update organization profile */
 
-        const users = await User.paginate(filter, options)
-        return users
-
-    }
-
-    /* update user */
-
-    public async updateUserById(id: string, updateBody: UpdateUserBody): Promise<IUserDoc> {
-        let user = await this.findUserById(id)
-        if (!user) {
-            throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    public async updateOrgProfile(id: string, updateBody: UpdateOrgBody): Promise<IOrganizationDoc> {
+        let org = await this.findOrgById(id)
+        if (!org) {
+            throw new ApiError(httpStatus.NOT_FOUND, 'Organization not found');
         }
 
-        if (updateBody.email && (await User.isEmailTaken(updateBody.email))) {
-            throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+        if (updateBody.name && (await Organization.isNameTaken(updateBody.name))) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Name is already taken');
         }
-        Object.assign(user, updateBody)
-        user = await this.userDal.updateUser(new mongoose.Types.ObjectId(id), user)
-        return user
+        if (updateBody.tinNo && (await Organization.isNameTaken(updateBody.tinNo))) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Tin Number is already taken');
+        }
+        Object.assign(org, updateBody)
+        org = await this.orgDal.updateOrg(new mongoose.Types.ObjectId(id), org)
+        return org
     }
-    /* delete user */
-    public async deleteUserById(id: string): Promise<IUserDoc> {
-        return await this.userDal.deleteUser(new mongoose.Types.ObjectId(id));
-    }
-
-
-
+    
 }
