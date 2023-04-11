@@ -2,7 +2,6 @@ import { OrgController } from "../controller";
 import { Router } from 'express';
 import { validate } from "../validator/custom"
 import { orgValidator } from "../validator";
-import { authenticateMiddleware, authorizeMiddleware } from "../service/auth";
 
 export class OrgRouter {
     public router: Router;
@@ -16,13 +15,13 @@ export class OrgRouter {
 
     public routes(): Router {
         // create organization
-        this.router.route('/createOrg').post(validate(orgValidator.createOrg), this.orgController.createOrg);
+        this.router.route('/create').post(validate(orgValidator.createOrg), this.orgController.createOrg);
         // get organizations 
-        this.router.route('/getOrgs').get(validate(orgValidator.getOrgs), this.orgController.getOrgs);
+        this.router.route('/getAll').get(validate(orgValidator.getOrgs), this.orgController.getOrgs);
         // get organization by id
-        this.router.route('/getOrg/:orgId').get(validate(orgValidator.getOrg), this.orgController.getOrg);
+        this.router.route('/get/:orgId').get(validate(orgValidator.getOrg), this.orgController.getOrg);
         // update organization by id
-        this.router.route('/updateOrg/:orgId').patch(validate(orgValidator.updateOrg), this.orgController.updateOrg);
+        this.router.route('/update/:orgId').patch(validate(orgValidator.updateOrg), this.orgController.updateOrg);
         
         return this.router;
     }

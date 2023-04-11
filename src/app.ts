@@ -2,7 +2,7 @@ import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { morganMiddleware } from './logger';
-import { UserRouter, AuthRouter } from './router';
+import { UserRouter, AuthRouter, OrgRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
@@ -19,6 +19,8 @@ class App {
         this.app.use('/api/v1/auth', new AuthRouter().routes());
         // user routes
         this.app.use('/api/v1/users', new UserRouter().routes());
+        // org routes
+        this.app.use('/api/v1/org', new OrgRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {
