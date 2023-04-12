@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { IAddress, AddressModel } from './address.model';
 import { toJSON } from '../../utils';
 
-const AddressSchema = new Schema<IAddress, AddressModel>({
+export const AddressSchema = new Schema<IAddress, AddressModel>({
     city: {
         type: String,
         required: true,

@@ -7,14 +7,14 @@ import { objectId } from './custom';
 
 const createOrgBody: Record<keyof NewOrg, any> = {
     name: joi.string().required(),
-    address: joi.string().required(),
+    address: joi.object().required(),
     type: joi.string().required(),
     tinNo: joi.string().required(),
-    capital: joi.string().required(),
+    capital: joi.number().integer().required(),
     sector: joi.string().required(),
     status: joi.string().required(),
-    license: joi.string().required(),
-    certificate: joi.string(),
+    license: joi.object().required(),
+    certificates: joi.array(),
 }
 
 export const createOrg = {
@@ -49,14 +49,14 @@ export const updateOrg = {
     body: Joi.object()
         .keys({
             name: joi.string(),
-            address: joi.string(),
+            address: joi.object(),
             type: joi.string(),
             tinNo: joi.string(),
-            capital: joi.string(),
+            capital: joi.number().integer(),
             sector: joi.string(),
             status: joi.string(),
-            license: joi.string(),
-            certificate: joi.string(),
+            license: joi.object(),
+            certificates: joi.array(),
             rating: joi.number().integer(),
         })
         .min(1),

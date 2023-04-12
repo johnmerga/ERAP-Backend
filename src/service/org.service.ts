@@ -70,7 +70,7 @@ export class OrgService {
         if (updateBody.name && (await Organization.isNameTaken(updateBody.name))) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Name is already taken');
         }
-        if (updateBody.tinNo && (await Organization.isNameTaken(updateBody.tinNo))) {
+        if (updateBody.tinNo && (await Organization.isTinNumberTaken(updateBody.tinNo))) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Tin Number is already taken');
         }
         Object.assign(org, updateBody)

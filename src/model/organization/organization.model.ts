@@ -8,9 +8,9 @@ export interface IOrganization {
     capital: Number;
     sector: string;
     status: string;
-    license: Types.ObjectId;
-    certificate: Types.ObjectId;
-    address: Types.ObjectId;
+    license: Types.Subdocument;
+    certificates: Types.Subdocument[];
+    address: Types.Subdocument;
     rating: Number;
     createdAt: Date;
     updatedAt: Date;
