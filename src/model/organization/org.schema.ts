@@ -1,11 +1,14 @@
-import  { Schema, model } from 'mongoose';
-import { IOrganization, OrganizationModel } from './organization.model';
+import { Schema, model } from 'mongoose';
+import { IOrganization, OrganizationModel } from './';
 import { toJSON, paginate } from '../../utils'
 import { AddressSchema } from '../address';
 import { CertificateSchema } from '../certificate';
 import { LicenseSchema } from '../license';
+import {ORG_STATUS} from './org.status'
+import {ORG_TYPE} from './org.type'
 
-const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
+
+const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
     name: {
         type: String,
         required: true,
@@ -13,6 +16,7 @@ const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
     type: {
         type: String,
         required: true,
+        enum: Object.values(ORG_TYPE),
     },
     tinNo: {
         type: String,
@@ -28,7 +32,9 @@ const OrganizationSchema = new Schema<IOrganization,OrganizationModel>({
     },
     status: {
         type: String,
-        required: true
+        required: true,
+        enum: Object.values(ORG_STATUS),
+
     },
     license: LicenseSchema,
     certificates: [CertificateSchema],
@@ -58,7 +64,7 @@ OrganizationSchema.statics.isNameTaken = async function (name: string, excludeUs
 
 // check if the tin number is already in use using schema.statics
 OrganizationSchema.statics.isTinNumberTaken = async function (tinNumber: string, excludeUserId?: string) {
-    const organization = await this.findOne({ tinNo:tinNumber, _id: { $ne: excludeUserId } });
+    const organization = await this.findOne({ tinNo: tinNumber, _id: { $ne: excludeUserId } });
     return !!organization;
 }
 

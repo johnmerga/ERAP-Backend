@@ -1,4 +1,4 @@
-export enum status {
+export enum ORG_STATUS {
     VERIFIED = 'VERIFIED',
     PENDING = 'PENDING',
     REJECTED = 'REJECTED'

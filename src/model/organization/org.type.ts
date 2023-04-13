@@ -1,5 +1,5 @@
 // organization type
-export enum OrganizationType {
+export enum ORG_TYPE {
     PRIVATE = 'private',
     GOVERNMENTAL = 'governmental',
     OTHER = 'other'
