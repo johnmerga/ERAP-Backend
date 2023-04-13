@@ -20,7 +20,7 @@ class App {
         // user routes
         this.app.use('/api/v1/users', new UserRouter().routes());
         // org routes
-        this.app.use('/api/v1/org', new OrgRouter().routes());
+        this.app.use('/api/v1/orgs', new OrgRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {

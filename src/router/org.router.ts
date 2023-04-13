@@ -15,13 +15,13 @@ export class OrgRouter {
 
     public routes(): Router {
         // create organization
-        this.router.route('/create').post(validate(orgValidator.createOrg), this.orgController.createOrg);
+        this.router.route('/').post(validate(orgValidator.createOrg), this.orgController.createOrg);
         // get organizations 
-        this.router.route('/getAll').get(validate(orgValidator.getOrgs), this.orgController.getOrgs);
+        this.router.route('/').get(validate(orgValidator.getOrgs), this.orgController.getOrgs);
         // get organization by id
-        this.router.route('/get/:orgId').get(validate(orgValidator.getOrg), this.orgController.getOrg);
+        this.router.route('/:orgId').get(validate(orgValidator.getOrg), this.orgController.getOrg);
         // update organization by id
-        this.router.route('/update/:orgId').patch(validate(orgValidator.updateOrg), this.orgController.updateOrg);
+        this.router.route('/:orgId').patch(validate(orgValidator.updateOrg), this.orgController.updateOrg);
         // add certificate to organization by id
         this.router.route('/addCert/:orgId').patch(validate(certValidator.createCert), this.orgController.addCertificate);
         // remove certificate from organization by id
