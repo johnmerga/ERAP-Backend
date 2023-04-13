@@ -1,4 +1,4 @@
-import mongoose, { Model, Document } from "mongoose";
+import mongoose, { Model, Document,Schema } from "mongoose";
 import { QueryResult } from "../../utils";
 import { AccessAndRefreshTokens } from "../token";
 

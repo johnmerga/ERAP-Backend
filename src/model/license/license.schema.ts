@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { ILicense, LicenseModel } from './license.model';
 import { toJSON } from '../../utils';
 
-const LicenseSchema = new Schema<ILicense, LicenseModel>({
+export const LicenseSchema = new Schema<ILicense, LicenseModel>({
     name: {
         type: String,
         required: true,

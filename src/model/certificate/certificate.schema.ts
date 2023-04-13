@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { ICertificate, CertificateModel } from './certificate.model';
 import { toJSON } from '../../utils';
 
-const CertificateSchema = new Schema<ICertificate, CertificateModel>({
+export const CertificateSchema = new Schema<ICertificate, CertificateModel>({
     name: {
         type: String,
         required: true,
