@@ -11,6 +11,8 @@ export interface ICertificate {
 export interface ICertificateDoc extends ICertificate, Document {
 }
 
+export type NewCertificate = Omit<ICertificate, 'createdAt' | 'updatedAt' >
+
 export type UpdateCertificateBody = Partial<ICertificate>
 
 export interface CertificateModel extends Model<ICertificateDoc> {

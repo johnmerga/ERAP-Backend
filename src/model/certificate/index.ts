@@ -1,3 +1,3 @@
-export { ICertificate, CertificateModel, ICertificateDoc, UpdateCertificateBody } from './certificate.model';
+export { ICertificate, CertificateModel, ICertificateDoc, NewCertificate, UpdateCertificateBody } from './certificate.model';
 export { CertificateSchema, Certificate } from './certificate.schema';
 

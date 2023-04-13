@@ -7,3 +7,6 @@ export { authValidator };
 // org validator
 import * as orgValidator from './org.validator';
 export { orgValidator };
+// cert validator
+import * as certValidator from './cert.validator';
+export { certValidator }

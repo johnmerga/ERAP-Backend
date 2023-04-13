@@ -1,5 +1,8 @@
-import { Model, Document, Types } from "mongoose";
+import { Model, Document } from "mongoose";
 import { QueryResult } from "../../utils";
+import { ILicenseDoc } from "../license";
+import { ICertificateDoc } from "../certificate";
+import { IAddressDoc } from "../address";
 
 export interface IOrganization {
     name: string;
@@ -8,9 +11,9 @@ export interface IOrganization {
     capital: Number;
     sector: string;
     status: string;
-    license: Types.Subdocument;
-    certificates: Types.Subdocument[];
-    address: Types.Subdocument;
+    license: ILicenseDoc;
+    certificates: ICertificateDoc[];
+    address: IAddressDoc;
     rating: Number;
     createdAt: Date;
     updatedAt: Date;
