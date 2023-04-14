@@ -41,7 +41,12 @@ export class OrgController {
             res.send(org);
         }
     });
-
+    public deleteOrg = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (typeof req.params.orgId === 'string') {
+            await this.orgService.deleteOrg(req.params.orgId);
+            res.status(httpStatus.NO_CONTENT).send();
+        }
+    })
     public addCertificate = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         if (typeof req.params.orgId === 'string') {
             const org = await this.orgService.addCertificate(req.params.orgId, req.body);

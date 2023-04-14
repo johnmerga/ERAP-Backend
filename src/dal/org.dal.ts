@@ -1,14 +1,9 @@
 import mongoose from "mongoose";
-
-import {
-    UpdateOrgBody,
-    Organization,
-    IOrganizationDoc,
-    NewOrg,
-} from "../model/organization";
+import { UpdateOrgBody, Organization, IOrganizationDoc, NewOrg, } from "../model/organization";
 import { ApiError } from "../errors";
 import httpStatus from "http-status";
 import { Certificate, NewCertificate } from "../model/certificate";
+import { mergeNestedObjects } from "../utils";
 
 export class OrgDal {
     async create(org: NewOrg): Promise<IOrganizationDoc> {
@@ -51,15 +46,19 @@ export class OrgDal {
         }
     }
 
-    async updateOrg(
-        id: mongoose.Types.ObjectId,
-        update: UpdateOrgBody
-    ): Promise<IOrganizationDoc> {
+    async updateOrg(id: mongoose.Types.ObjectId, update: UpdateOrgBody): Promise<IOrganizationDoc> {
         try {
-            const org = await Organization.findOne({ _id: id });
+            const org = await Organization.findById(id);
             if (!org) throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
-            org.set(update);
-            org.save();
+            const orgJSON = org.toJSON()
+            let updatedOrg = mergeNestedObjects(orgJSON, update)
+            Object.assign(org, updatedOrg)
+            if (update.certificates)
+                org.certificates = update.certificates;
+            if (update.license?.expDate)
+                org.license.expDate = new Date(update.license.expDate);
+            org.updatedAt = new Date()
+            await org.save();
             return org;
         } catch (error) {
             throw new ApiError(
@@ -69,6 +68,16 @@ export class OrgDal {
         }
     }
 
+    /* delete org */
+    async deleteOrg(id: mongoose.Types.ObjectId): Promise<IOrganizationDoc> {
+        try {
+            const org = await Organization.findByIdAndDelete(id)
+            if (!org) throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
+            return org;
+        } catch (error) {
+            throw new Error("Error while deleting organization.");
+        }
+    }
     async addCertificate(
         id: mongoose.Types.ObjectId,
         certBody: NewCertificate
@@ -91,13 +100,10 @@ export class OrgDal {
     async removeCertificate(orgId: mongoose.Types.ObjectId, certId: mongoose.Types.ObjectId): Promise<IOrganizationDoc> {
         try {
             let org = await Organization.findOne({ _id: orgId });
-            if (org) {
-                await Organization.updateOne({ _id: orgId }, { $pull: { certificates: { _id: certId } } })
-                org = await Organization.findOne({ _id: orgId });
-                return org as IOrganizationDoc;
-            } else {
-                throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
-            }
+            if (!org) throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
+            await Organization.updateOne({ _id: orgId }, { $pull: { certificates: { _id: certId } } })
+            org = await Organization.findOne({ _id: orgId });
+            return org as IOrganizationDoc;
         } catch (error) {
             throw new ApiError(
                 httpStatus.BAD_REQUEST,

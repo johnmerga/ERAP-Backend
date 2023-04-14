@@ -2,24 +2,50 @@ import joi from 'joi';
 import { NewOrg } from '../model/organization';
 import Joi from 'joi';
 import { objectId } from './custom';
+import { NewLicense } from '../model/license';
+import { NewAddress } from '../model/address';
+import { NewCertificate } from '../model/certificate';
+
+// new license validator
+const createLicenseBody: Record<keyof NewLicense, any> = {
+    name: joi.string(),
+    licenseNumber: joi.string(),
+    expDate: joi.date(),
+    photo: joi.string(),
+}
+// new Address validator
+const createAddressBody: Record<keyof NewAddress, any> = {
+    city: joi.string(),
+    subcity: joi.string(),
+    woreda: joi.string(),
+    telephoneNum: joi.string(),
+}
+// new certificate validator
+const createCertBody: Record<keyof NewCertificate, any> = {
+    name: joi.string(),
+    photo: joi.string(),
+    certNumber: joi.string()
+}
+
+
+
 
 // new org validator
-
-const createOrgBody: Record<keyof NewOrg, any> = {
-    name: joi.string().required(),
-    address: joi.object().required(),
-    type: joi.string().required(),
-    tinNo: joi.string().required(),
-    capital: joi.number().integer().required(),
-    sector: joi.string().required(),
-    status: joi.string().required(),
-    license: joi.object().required(),
-    certificates: joi.array(),
+export const createOrgBody: Record<keyof NewOrg, any> = {
+    name: joi.string(),
+    address: joi.object().keys(createAddressBody),
+    type: joi.string(),
+    tinNo: joi.string(),
+    capital: joi.number().integer(),
+    sector: joi.string(),
+    status: joi.string(),
+    license: joi.object().keys(createLicenseBody),
+    certificates: joi.array().items(joi.object().keys(createCertBody)),
 }
 
 export const createOrg = {
-    body: joi.object().keys(createOrgBody),
-}   
+    body: joi.object().keys(createOrgBody).options({ presence: "required" }),
+}
 
 export const getOrgs = {
     query: Joi.object().keys({
@@ -47,17 +73,13 @@ export const updateOrg = {
         orgId: Joi.required().custom(objectId),
     }),
     body: Joi.object()
-        .keys({
-            name: joi.string(),
-            address: joi.object(),
-            type: joi.string(),
-            tinNo: joi.string(),
-            capital: joi.number().integer(),
-            sector: joi.string(),
-            status: joi.string(),
-            license: joi.object(),
-            certificates: joi.array(),
-            rating: joi.number().integer(),
-        })
+        .keys(createOrgBody)
         .min(1),
 };
+
+export const deleteOrg = {
+    params: Joi.object().keys({
+        orgId: Joi.string().custom(objectId),
+    }),
+}
+

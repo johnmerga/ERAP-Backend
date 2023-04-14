@@ -11,7 +11,7 @@ export interface ILicense {
 
 export interface ILicenseDoc extends ILicense, Document {
 }
-
+export type NewLicense = Omit<ILicense, 'createdAt' | 'updatedAt'>
 export type UpdateLicenseBody = Partial<ILicense>
 
 export interface LicenseModel extends Model<ILicenseDoc> {
