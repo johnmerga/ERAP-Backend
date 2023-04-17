@@ -80,6 +80,15 @@ export class UserService {
         return await this.userDal.deleteUser(new mongoose.Types.ObjectId(id));
     }
 
+    /* get user permissions as an array */
+    public async getUserPermissions(id: string): Promise<string[]> {
+        let user = await this.findUserById(id);
+        user = await user.populate('permissions')
+        const userPermissions = user.permissions.map((permission: Record<string, any>) => {
+            return permission.name
+        })
+        return userPermissions
+    }
 
 
 }

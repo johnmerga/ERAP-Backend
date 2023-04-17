@@ -5,8 +5,6 @@ import config from '../../config/config';
 import { ApiError } from '../../errors';
 import HttpStatus from 'http-status';
 import { UserService } from '../user.service';
-import { PermissionService } from '../permission.service';
-
 
 export const authenticateMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -16,11 +14,12 @@ export const authenticateMiddleware = async (req: Request, res: Response, next: 
         if (typeof decoded.sub !== 'string') {
             throw new ApiError(HttpStatus.BAD_REQUEST, 'bad user')
         }
-        const user = await new UserService().findUserById(decoded.sub)
+        const userService = new UserService()
+        const user = await userService.findUserById(decoded.sub)
         if (!user) {
             throw new ApiError(HttpStatus.UNAUTHORIZED, 'Please authenticate.');
         }
-        const userPermissionList = await new PermissionService().getAllUserPermissions(user.id)
+        const userPermissionList = await userService.getUserPermissions(user.id)
         req.permissions = userPermissionList
         req.user = user;
         next();
