@@ -5,6 +5,6 @@ export { pick } from "./pick"
 export { IOptions, QueryResult } from "./paginate"
 import paginate from './paginate'
 export { paginate }
-export { mergeNestedObjects,copyObject } from "./mergeObj"
+export { mergeNestedObjects } from "./mergeObj"
 
 
