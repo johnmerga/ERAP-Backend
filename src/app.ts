@@ -21,6 +21,8 @@ class App {
         this.app.use('/api/v1/users', new UserRouter().routes());
         // org routes
         this.app.use('/api/v1/orgs', new OrgRouter().routes());
+        // tender routes
+        this.app.use('/api/v1/tenders', new TenderRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {

@@ -10,3 +10,7 @@ export { orgValidator };
 // cert validator
 import * as certValidator from './cert.validator';
 export { certValidator }
+// form validator
+export * as formValidator from './form.validator';
+// tender validator
+export * as tenderValidator from './tender.validator';
