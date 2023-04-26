@@ -1,5 +1,5 @@
 export { IOrganization, OrganizationModel, IOrganizationDoc, UpdateOrgBody, NewOrg } from './org.model';
 export { Organization } from './org.schema';
 export { ORG_STATUS } from './org.status';
-export { ORG_TYPE } from './org.type';
+export * from './org.type';
 
