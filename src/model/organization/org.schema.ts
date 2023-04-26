@@ -4,8 +4,8 @@ import { toJSON, paginate } from '../../utils'
 import { AddressSchema } from '../address';
 import { CertificateSchema } from '../certificate';
 import { LicenseSchema } from '../license';
+import {ORG_TYPE,ORG_SECTOR_TYPE,} from './org.type'
 import {ORG_STATUS} from './org.status'
-import {ORG_TYPE} from './org.type'
 
 
 const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
@@ -28,7 +28,8 @@ const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
     },
     sector: {
         type: String,
-        required: true
+        required: true,
+        enum: Object.values(ORG_SECTOR_TYPE),
     },
     status: {
         type: String,

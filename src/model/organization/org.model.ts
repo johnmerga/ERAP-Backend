@@ -3,14 +3,16 @@ import { QueryResult } from "../../utils";
 import { NewLicense } from "../license";
 import {  NewCertificate } from "../certificate";
 import { NewAddress } from "../address";
+import {ORG_SECTOR_TYPE,ORG_TYPE} from './org.type'
+import {ORG_STATUS} from './org.status'
 
 export interface IOrganization {
     name: string;
-    type: string;
+    type: ORG_TYPE;
     tinNo: string;
     capital: Number;
-    sector: string;
-    status: string;
+    sector: ORG_SECTOR_TYPE;
+    status: ORG_STATUS;
     license: NewLicense;
     certificates: NewCertificate[];
     address: NewAddress;
