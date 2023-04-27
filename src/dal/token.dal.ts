@@ -1,11 +1,20 @@
+import httpStatus from "http-status"
 import { ITokenDoc, NewToken, Token, TokenQuery } from "../model/token"
+import { ApiError } from "../errors"
 
 export class TokenDal {
     // create a new token
     async createToken(newToken: NewToken): Promise<ITokenDoc> {
-        const token = await new Token(newToken).save()
-        if (!token) throw new Error('error occured while saving the token to database')
-        return token
+        try {
+            const token = await new Token(newToken).save()
+            if (!token) {
+                throw new ApiError(httpStatus.BAD_REQUEST, 'error occured while creating token')
+            }
+            return token
+        } catch (error) {
+            if(error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.BAD_REQUEST, 'system error occured while creating token')
+        }
     }
 
     // find a token
