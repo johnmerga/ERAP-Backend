@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 import config from "../config/config";
 import logger from "../logger/logger";
 
-
+const isDevelopment = process.env.NODE_ENV === 'development'
 export const connect = async () => {
-    await mongoose.connect(`${config.mongoose.url}/${config.mongoose.dbName}`, {});
+     await mongoose.connect(`${config.mongoose.url}`, {});
 }
 
 mongoose.connection.on('connecting', function () {
-    logger.info('Connecting to MongoDB')
+    isDevelopment ? logger.info('...connecting to local MongoDB') : logger.info('...connecting to MongoDB Atlas')
 })
 
 mongoose.connection.on('error', function () {
