@@ -44,6 +44,8 @@ class App {
         // enable cors
         this.app.use(cors());
         this.app.use('*', cors())
+        // telling express server to trust whatever our nginx server is adding to header
+        this.app.set('trust proxy', true);
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(morganMiddleware);
