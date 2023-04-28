@@ -18,7 +18,7 @@ export class EmailService {
                 await this.transporter.verify();
                 Logger.info('Connected to email server successfully.');
             } catch (error) {
-                Logger.error('Error connecting to email server: please check your email configuration in you .env file');
+                Logger.warn('Error connecting to email server: please check your email configuration in you .env file');
             }
         }
     }
