@@ -57,7 +57,7 @@ export class OrgService {
         if (await this.isTinNumberTaken(orgBody.tinNo)) {
             throw new ApiError(httpStatus.BAD_REQUEST, "Tin Number is already taken");
         }
-        return this.orgDal.create(orgBody);
+        return await this.orgDal.create(orgBody);
     }
 
     /* update organization profile */

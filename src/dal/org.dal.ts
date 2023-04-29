@@ -8,13 +8,13 @@ import { mergeNestedObjects } from "../utils";
 export class OrgDal {
     async create(org: NewOrg): Promise<IOrganizationDoc> {
         try {
-            const newOrg = new Organization(org);
-            return await newOrg.save();
+            const newOrg = await new Organization(org).save()
+            if (!newOrg)
+                throw new ApiError(httpStatus.BAD_REQUEST, "organization creation was unsuccessful");
+            return newOrg
         } catch (error) {
-            throw new ApiError(
-                httpStatus.BAD_REQUEST,
-                "Error Happened While creating Organization"
-            );
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While creating Organization");
         }
     }
 
@@ -25,10 +25,8 @@ export class OrgDal {
                 throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
             return org
         } catch (error) {
-            throw new ApiError(
-                httpStatus.BAD_REQUEST,
-                "Error occured while finding organization"
-            );
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While finding Organization");
         }
     }
 
@@ -39,10 +37,8 @@ export class OrgDal {
                 throw new ApiError(httpStatus.BAD_REQUEST, "No organizations found");
             return orgs as IOrganizationDoc[];
         } catch (error) {
-            throw new ApiError(
-                httpStatus.BAD_REQUEST,
-                "Error occured while finding organizations"
-            );
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While finding Organizations");
         }
     }
 
@@ -61,10 +57,8 @@ export class OrgDal {
             await org.save();
             return org;
         } catch (error) {
-            throw new ApiError(
-                httpStatus.BAD_REQUEST,
-                "Error while updating organization."
-            );
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While updating Organization");
         }
     }
 
@@ -72,10 +66,11 @@ export class OrgDal {
     async deleteOrg(id: mongoose.Types.ObjectId): Promise<IOrganizationDoc> {
         try {
             const org = await Organization.findByIdAndDelete(id)
-            if (!org) throw new ApiError(httpStatus.BAD_REQUEST, "Organization not found");
+            if (!org) throw new ApiError(httpStatus.BAD_REQUEST, "unable to delete organization: organization not found");
             return org;
         } catch (error) {
-            throw new Error("Error while deleting organization.");
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While deleting Organization");
         }
     }
     async addCertificate(
@@ -90,10 +85,8 @@ export class OrgDal {
             await org.save();
             return org;
         } catch (error) {
-            throw new ApiError(
-                httpStatus.BAD_REQUEST,
-                "Error while adding certificate."
-            );
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While adding Certificate");
         }
     }
 
@@ -105,10 +98,8 @@ export class OrgDal {
             org = await Organization.findOne({ _id: orgId });
             return org as IOrganizationDoc;
         } catch (error) {
-            throw new ApiError(
-                httpStatus.BAD_REQUEST,
-                "Error while removing certificate."
-            );
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While deleting Certificate");
         }
     }
 }

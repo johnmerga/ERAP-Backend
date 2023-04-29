@@ -6,6 +6,9 @@ export const objectId = (value: string, helpers: CustomHelpers) => {
   }
   return value;
 };
+export const capitalizeFirstLetter = (value: string, helpers: CustomHelpers) => {
+    return value.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+};
 
 export const password = (value: string, helpers: CustomHelpers) => {
   if (value.length < 8) {

@@ -1,34 +1,32 @@
 import joi from 'joi';
-import { NewUser } from '../model/user';
+import { NewUser, Role } from '../model/user';
 import Joi from 'joi';
-import { objectId, password } from './custom';
+import { capitalizeFirstLetter, objectId, password } from './custom';
 
 // new user validator
 
 const createUserBody: Record<keyof NewUser, any> = {
-    name: joi.string().required(),
-    email: joi.string().email().required(),
-    password: joi.string().required().custom(password),
-    address: joi.string().required(),
-    phone: joi.string().required(),
-
+    name: joi.string().custom(capitalizeFirstLetter).trim(),
+    email: joi.string().email().lowercase().trim(),
+    password: joi.string().custom(password).trim(),
+    address: joi.string().custom(capitalizeFirstLetter).trim(),
+    phone: joi.string().trim(),
 }
 
 export const createUser = {
-    body: joi.object().keys(createUserBody),
+    body: joi.object().keys(createUserBody).options({ presence: "required" }),
 }
 
 export const getUsers = {
     query: Joi.object().keys({
-        name: Joi.string(),
-        roles: Joi.string(),
+        name: createUserBody.name,
+        roles: Joi.string().valid(...Object.values(Role)).insensitive().trim(),
         orgId: Joi.string().custom(objectId),
         sortBy: Joi.string(),
         projectBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
-
-
+        populate: Joi.string(),
     })
 }
 
@@ -44,12 +42,8 @@ export const updateUser = {
     }),
     body: Joi.object()
         .keys({
-            email: Joi.string().email(),
-            password: Joi.string().custom(password),
-            name: Joi.string(),
-            address: joi.string(),
-            phone: joi.string(),
-            roles: joi.array().items(joi.string()),
+            ...createUserBody,
+            roles: joi.array().items(joi.string().valid(...Object.values(Role)).insensitive().trim()),
         })
         .min(1),
 };
@@ -59,4 +53,3 @@ export const deleteUser = {
         userId: Joi.string().custom(objectId),
     }),
 };
-
