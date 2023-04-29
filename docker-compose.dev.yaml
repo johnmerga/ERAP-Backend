@@ -12,6 +12,7 @@ services:
     build:
       context: .
       target: development
+    image: johnmerga/erap-backend_api
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
