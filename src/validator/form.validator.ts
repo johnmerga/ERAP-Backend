@@ -4,21 +4,21 @@ import { NewForm, FormQuestionType, FormType, IFormFields } from "../model/form"
 
 // a single question validation
 const formQuestionBody: Record<keyof IFormFields, any> = {
-    question: joi.string(),
-    type: joi.string().valid(...Object.values(FormQuestionType)),
+    question: joi.string().trim(),
+    type: joi.string().valid(...Object.values(FormQuestionType)).insensitive(),
     options: joi.array().items(joi.string()).when('type', {
         is: [FormQuestionType.CHECKBOX, FormQuestionType.RADIO, FormQuestionType.DROPDOWN],
-        then: joi.array().items(joi.string().required()).required(),
+        then: joi.array().items(joi.string().required().trim()).required(),
         otherwise: joi.array().items(joi.string()).optional(),
     }),
     required: joi.boolean(),
 }
 // form validation
 const formBody: Record<keyof NewForm, any> = {
-    tenderId: joi.string().custom(objectId),
-    description: joi.string(),
-    title: joi.string(),
-    type: joi.string().valid(...Object.values(FormType)),
+    tenderId: joi.string().custom(objectId).trim(),
+    description: joi.string().trim(),
+    title: joi.string().trim(),
+    type: joi.string().valid(...Object.values(FormType)).insensitive(),
     fields: joi.array().items(formQuestionBody),
 }
 

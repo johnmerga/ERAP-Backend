@@ -1,13 +1,13 @@
 import joi from "joi";
-import { password } from "./custom";
+import { capitalizeFirstLetter, password } from "./custom";
 import { NewAdmin } from "../model/user";
 
 export const registerBody: Record<keyof NewAdmin, any> = {
-    name: joi.string().required(),
-    email: joi.string().email().required(),
-    password: joi.string().required(),
-    phone: joi.string().required(),
-    address: joi.string().required(),
+    name: joi.string().required().custom(capitalizeFirstLetter).trim(),
+    email: joi.string().email().required().trim(),
+    password: joi.string().required().trim(),
+    phone: joi.string().required().trim(),
+    address: joi.string().required().custom(capitalizeFirstLetter).trim(),
 }
 
 export const register = {
@@ -16,8 +16,8 @@ export const register = {
 
 export const login = {
     body: joi.object().keys({
-        email: joi.string().email().required(),
-        password: joi.string().custom(password).required(),
+        email: joi.string().email().required().trim(),
+        password: joi.string().custom(password).required().trim(),
     }),
 
 }
@@ -30,13 +30,13 @@ export const logout = {
 
 export const refreshTokens = {
     body: joi.object().keys({
-        refreshToken: joi.string().required(),
+        refreshToken: joi.string().required().trim(),
     }),
 };
 
 export const forgotPassword = {
     body: joi.object().keys({
-        email: joi.string().required(),
+        email: registerBody.email
     })
 }
 
@@ -45,12 +45,12 @@ export const resetPassword = {
         token: joi.string().required(),
     }),
     body: joi.object().keys({
-        password: joi.string().required().custom(password),
+        password: registerBody.password,
     }),
 };
 
 export const verifyEmail = {
     query: joi.object().keys({
-        token: joi.string().required(),
+        token: joi.string().required().trim(),
     }),
 };
