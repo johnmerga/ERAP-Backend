@@ -26,6 +26,10 @@ const envVarsSchema = joi.object({
     // EMAIL_TO: joi.string().required().description('Email to which the emails are sent'),
     CLIENT_URL: joi.string().required().description('Client url for the application').default('http://localhost:5000'),
 
+    // payment
+    CHAPA_PUB_KEY: joi.string().required().description('Chapa public key'),
+    CHAPA_SECRETE_KEY: joi.string().required().description('Chapa secrete key'),
+
 }).unknown().required();
 
 
@@ -69,6 +73,13 @@ const config = {
             secure: envVars.SMTP_PORT === 465 ? true : false,
         },
         emailFrom: envVars.EMAIL_FROM,
+    },
+    /* payment */
+    payment: {
+        chapa: {
+            pubKey: envVars.CHAPA_PUB_KEY,
+            secreteKey: envVars.CHAPA_SECRETE_KEY,
+        }
     },
     /*  */
     baseUrl: envVars.BASE_URL,
