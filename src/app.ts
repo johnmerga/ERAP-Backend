@@ -6,6 +6,7 @@ import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantR
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
+import { SubmissionRouter } from './router/submission.router';
 
 class App {
     public app: Express;
@@ -27,6 +28,8 @@ class App {
         this.app.use('/api/v1/tenders', new TenderRouter().routes());
         // applicant routes
         this.app.use('/api/v1/applicants', new ApplicantRouter().routes());
+        // submission routes
+        this.app.use('/api/v1/submissions', new SubmissionRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {

@@ -16,3 +16,5 @@ export * as formValidator from './form.validator';
 export * as tenderValidator from './tender.validator';
 // applicant validator
 export * as applicantValidator from './applicant.validator';
+// submission validator
+export * as submissionValidator from "./submission.validator"
