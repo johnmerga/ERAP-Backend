@@ -108,9 +108,10 @@ export class SubmissionService {
             if (!submission) throw new ApiError(httpStatus.NOT_FOUND, 'unable to delete answers: submission not found')
             answerIds.forEach((answerId) => {
                 const answerIndex = submission.answers.findIndex((ans) => ans.id === answerId)
-                if (answerIndex !== -1) {
-                    submission.answers.splice(answerIndex, 1)
+                if (answerIndex === -1) {
+                    throw new ApiError(httpStatus.NOT_FOUND, `unable to find answer with id: ${answerId}`)
                 }
+                submission.answers.splice(answerIndex, 1)
             })
             await submission.save()
         } catch (error) {
