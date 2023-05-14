@@ -6,6 +6,7 @@ export interface ISubmission {
     orgId: string;
     formId: string;
     answers: IAnswer[];
+    score?: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -17,5 +18,5 @@ export interface ISubmissionModel extends Model<ISubmissionDoc> {
 }
 
 
-export type NewSubmission = Omit<ISubmission, 'createdAt' | 'updatedAt'>
+export type NewSubmission = Omit<ISubmission, 'createdAt' | 'updatedAt' | 'score'>
 export type UpdateSubmissionBody = Partial<ISubmission>

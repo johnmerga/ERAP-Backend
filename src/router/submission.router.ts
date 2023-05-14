@@ -20,12 +20,13 @@ export class SubmissionRouter {
         this.router.route('/:submissionId').get(validate(submissionValidator.getSubmission), this.submissionController.getSubmission)
         // update submission
         this.router.route('/:submissionId').patch(validate(submissionValidator.updateSubmission), this.submissionController.updateSubmission)
-        // delete answers
-        this.router.route('/:submissionId/answers').delete(validate(submissionValidator.deleteAnswers), this.submissionController.deleteAnswers)
         // give mark
         this.router.route('/:submissionId/mark').patch(validate(submissionValidator.evaluateSubmission), this.submissionController.giveMark)
         // delete submission
         this.router.route('/:submissionId').delete(validate(submissionValidator.deleteSubmission), this.submissionController.deleteSubmission)
+
+        // populate answers with question
+        this.router.route('/:submissionId/answers').get(validate(submissionValidator.getSubmission), this.submissionController.getSubmissionWithQuestion)
         return this.router
     }
 }

@@ -1,6 +1,7 @@
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
 import { ISubmission, ISubmissionDoc, Submission, UpdateSubmissionBody, } from "../model/submission";
+import { Operation, updateSubDocuments } from "../utils/updateSubDocs";
 
 export class SubmissionDAL {
     async create(submission: ISubmission): Promise<any> {
@@ -26,26 +27,29 @@ export class SubmissionDAL {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While finding Submission")
         }
     }
-    async updateSubmission(submissionId: string, update: UpdateSubmissionBody): Promise<ISubmissionDoc> {
+    async updateSubmission(submissionId: string, update: UpdateSubmissionBody, subDocOperation?: Operation): Promise<ISubmissionDoc> {
         try {
-            const submission = await Submission.findById(submissionId)
-            if (!submission) {
-                throw new ApiError(httpStatus.BAD_REQUEST, "Submission not found")
-            }
+            const { answers, } = update
+            if (answers && answers.length > 0) {
 
-            // take everything except answers
-            const { answers, ...rest } = update
-            Object.assign(submission, rest)
-            if (update.answers) {
-                for (const answer of update.answers) {
-                    const answerIndex = submission.answers.findIndex((ans) => ans.id === answer.id)
-                    if (answerIndex === -1) {
-                        submission.answers.push(answer)
-                    } else {
-                        submission.answers[answerIndex] = answer
+                const subDocUpdates = answers.map(({ id, ...otherFields }) => ({
+                    id,
+                    update: {
+                        _id: id,
+                        ...otherFields
                     }
+                }))
+                const isSubDocSaved = await updateSubDocuments(Submission, submissionId, 'answers', subDocUpdates, subDocOperation ?? Operation.UPDATE)
+                if (isSubDocSaved instanceof Error) {
+                    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, isSubDocSaved.message)
                 }
+                return isSubDocSaved
+
             }
+            // refresh the latest submission
+            const submission = await Submission.findById(submissionId)
+            if (!submission) throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `failed to refresh submission: ${submissionId}`)
+            submission.updatedAt = new Date()
             await submission.save()
             return submission
         } catch (error) {

@@ -29,10 +29,12 @@ export const getSubmissions = {
         tenderId: submissionBody.tenderId,
         orgId: submissionBody.orgId,
         formId: submissionBody.formId,
+        score: Joi.number().min(0).max(100),
         page: Joi.number().min(1),
         limit: Joi.number().min(1),
         sortBy: Joi.string(),
         projectBy: Joi.string(),
+        populate: Joi.string(),
     })
 }
 
