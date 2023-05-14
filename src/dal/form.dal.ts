@@ -24,9 +24,18 @@ export class FormDal {
         } catch (error) {
             if (error instanceof ApiError) {
                 throw error
-            } 
+            }
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while fetching form')
 
+        }
+    }
+
+    async getForms(): Promise<IFormDoc[]> {
+        try {
+            const forms = await Form.find()
+            return forms
+        } catch (error) {
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while fetching forms')
         }
     }
     async updateForm(id: string, update: UpdateFormBody): Promise<IFormDoc> {
@@ -45,7 +54,7 @@ export class FormDal {
 
         }
     }
-    async deleteForm(id:string): Promise<IFormDoc> {
+    async deleteForm(id: string): Promise<IFormDoc> {
         try {
 
             const form = await Form.findByIdAndDelete(id)

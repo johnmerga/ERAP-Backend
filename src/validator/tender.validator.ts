@@ -9,6 +9,7 @@ const tenderBody: Record<keyof NewTender, any> = {
     description: joi.string().trim(),
     type: joi.string().valid(...Object.values(TenderType)).insensitive().trim(),
     sector: joi.string().valid(...Object.values(ORG_SECTOR_TYPE)).insensitive().trim(),
+    qualifications: joi.array().items(joi.string().trim()).optional(),
     status: joi.string().valid(...Object.values(TenderStatus)).insensitive().trim(),
     openDate: joi.date(),
     closeDate: joi.date(),

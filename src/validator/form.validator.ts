@@ -32,6 +32,18 @@ export const getForm = {
     }),
 }
 
+export const getForms = {
+    query: joi.object().keys({
+        tenderId: joi.string().custom(objectId).trim(),
+        type: joi.string().valid(...Object.values(FormType)).insensitive(),
+        page: joi.number().min(1),
+        limit: joi.number().min(1),
+        sortBy: joi.string(),
+        projectBy: joi.string(),
+        populate: joi.string(),
+    })
+}
+
 export const updateForm = {
     params: joi.object().keys({
         formId: joi.string().custom(objectId),

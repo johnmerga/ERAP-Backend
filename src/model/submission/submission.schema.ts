@@ -21,6 +21,10 @@ const submissionSchema = new Schema<ISubmissionDoc, ISubmissionModel>({
         required: true,
     },
     answers: [answerSchema],
+    score: {
+        type: Number,
+        default: 0,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

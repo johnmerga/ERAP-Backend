@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { catchAsync } from "../utils";
+import { catchAsync, pick } from "../utils";
 import httpStatus from "http-status";
 import { SubmissionService } from "../service/submission.service";
 
@@ -19,7 +19,7 @@ export class SubmissionController {
     }
     )
     querySubmissions = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const filter = req.query
+        const filter = pick(req.query, ['tenderId', 'orgId', 'formId', 'score'])
         const options = req.query
         const result = await this.submissionService.querySubmissions(filter, options)
         res.status(httpStatus.OK).send(result)
@@ -36,16 +36,17 @@ export class SubmissionController {
         const submission = await this.submissionService.giveMark(req.params.submissionId, req.body.marks)
         res.status(httpStatus.OK).send(submission)
     })
-    // delete answers 
-    deleteAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        await this.submissionService.deleteAnswers(req.params.submissionId, req.body.answerIds)
-        res.status(httpStatus.OK).send()
-    })
     deleteSubmission = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         await this.submissionService.deleteSubmission(req.params.submissionId)
         res.status(httpStatus.OK).send()
     }
     )
+
+    // populate answers with question
+    getSubmissionWithQuestion = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const submission = await this.submissionService.getSubmissionWithQuestion(req.params.submissionId)
+        res.status(httpStatus.OK).send(submission)
+    })
 
 
 }

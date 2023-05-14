@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { FormService } from "../service";
-import { catchAsync } from "../utils";
+import { catchAsync, pick } from "../utils";
 import httpStatus from "http-status";
 import mongoose from "mongoose";
 
@@ -18,6 +18,12 @@ export class FormController {
     getForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const form = await this.formService.getForm(req.params.formId)
         res.status(httpStatus.OK).send(form)
+    })
+    queryForms = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const filter = pick(req.query, ['type','tenderId'])
+        const options = req.query
+        const result = await this.formService.queryForms(filter, options)
+        res.status(httpStatus.OK).send(result)
     })
     updateForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const form = await this.formService.updateForm(req.params.formId, req.body)
