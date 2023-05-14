@@ -9,6 +9,7 @@ export interface ITender {
     description: string,
     type: TenderType,
     sector: ORG_SECTOR_TYPE,
+    qualifications: string[],
     status: TenderStatus,
     openDate: Date,
     bidDeadline: Date,

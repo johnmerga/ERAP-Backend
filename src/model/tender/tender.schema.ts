@@ -27,6 +27,9 @@ const tenderSchema = new Schema<ITenderDoc, ITenderModel>({
         enum: Object.values(ORG_SECTOR_TYPE),
         required: true,
     },
+    qualifications: {
+        type: [String],
+    },
     status: {
         type: String,
         enum: Object.values(TenderStatus),
