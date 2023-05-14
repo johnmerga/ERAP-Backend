@@ -16,6 +16,8 @@ export class FormRouter {
         this.router.route('/').post(validate(formValidator.createForm), this.formController.createForm);
         // get form by id
         this.router.route('/:formId').get(validate(formValidator.getForm), this.formController.getForm);
+        // get all forms
+        this.router.route('/').get(validate(formValidator.getForms), this.formController.queryForms);
         // update form by id
         this.router.route('/:formId').patch(validate(formValidator.updateForm), this.formController.updateForm);
         // delete form by id

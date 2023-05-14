@@ -1,8 +1,29 @@
 import { Schema, model } from "mongoose";
-import { IFormDoc, IFormModel } from "./form.model";
+import { IFormDoc, IFormFieldsDoc, IFormFieldsModel, IFormModel } from "./form.model";
 import { FormType, FormQuestionType } from "./form.types";
-import { toJSON } from "../../utils";
+import { paginate, toJSON } from "../../utils";
+//
+const formFieldSchema = new Schema<IFormFieldsDoc, IFormFieldsModel>({
+    question: {
+        type: String,
+        required: true,
+    },
+    type: {
+        type: String,
+        enum: Object.values(FormQuestionType),
+        required: true,
+    },
 
+    options: [{
+        type: String,
+    }],
+    required: {
+        type: Boolean,
+        required: true,
+    },
+})
+
+// 
 const formSchema = new Schema<IFormDoc, IFormModel>({
     title: {
         type: String,
@@ -22,25 +43,7 @@ const formSchema = new Schema<IFormDoc, IFormModel>({
         enum: Object.values(FormType),
         required: true,
     },
-    fields: [{
-        question: {
-            type: String,
-            required: true,
-        },
-        type: {
-            type: String,
-            enum: Object.values(FormQuestionType),
-            required: true,
-        },
-
-        options: [{
-            type: String,
-        }],
-        required: {
-            type: Boolean,
-            required: true,
-        },
-    }],
+    fields: [formFieldSchema],
     createdAt: {
         type: Date,
         default: Date.now,
@@ -53,4 +56,9 @@ const formSchema = new Schema<IFormDoc, IFormModel>({
 })
 
 formSchema.plugin(toJSON);
+formSchema.plugin(paginate);
+// 
+formFieldSchema.plugin(toJSON);
+
+export const FormField = model<IFormFieldsDoc, IFormFieldsModel>("FormField", formFieldSchema);
 export const Form = model<IFormDoc, IFormModel>("Form", formSchema);

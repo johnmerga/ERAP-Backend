@@ -8,6 +8,8 @@ export interface IFormFields {
     required: boolean,
 
 }
+export interface IFormFieldsDoc extends IFormFields, Document { }
+export interface IFormFieldsModel extends Model<IFormFieldsDoc> { }
 export interface IForm {
     title: string,
     description: string,
@@ -25,4 +27,5 @@ export type NewForm = Omit<IForm, 'createdAt' | 'updatedAt'>
 export type UpdateFormBody = Partial<IForm>
 
 export interface IFormModel extends Model<IFormDoc> {
+    paginate: (filter: any, options: any) => Promise<any>
 }
