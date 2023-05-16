@@ -48,5 +48,27 @@ export class SubmissionController {
         res.status(httpStatus.OK).send(submission)
     })
 
+    /**
+     * ----------------------------------------------------------------------------------------------------
+     * the following functions are only for answers
+     * ----------------------------------------------------------------------------------------------------
+     */
+
+    // add submission answers
+    addAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const submission = await this.submissionService.addAnswers(req.params.submissionId, req.body.answers)
+        res.status(httpStatus.OK).send(submission)
+    }
+    )
+    // update submission answers
+    updateAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const submission = await this.submissionService.updateAnswers(req.params.submissionId, req.body.answers)
+        res.status(httpStatus.OK).send(submission)
+    })
+    // delete submission answers
+    deleteAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const submission = await this.submissionService.deleteAnswers(req.params.submissionId, req.body.answers)
+        res.status(httpStatus.OK).send(submission)
+    })
 
 }

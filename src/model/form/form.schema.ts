@@ -44,15 +44,8 @@ const formSchema = new Schema<IFormDoc, IFormModel>({
         required: true,
     },
     fields: [formFieldSchema],
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
+},{
+    timestamps: true
 })
 
 formSchema.plugin(toJSON);

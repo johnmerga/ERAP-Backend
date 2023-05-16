@@ -3,8 +3,8 @@ import { OrgDal } from "../dal";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
 import mongoose from "mongoose";
-import { IOptions, QueryResult } from "../utils";
-import { NewCertificate } from "../model/certificate";
+import { IOptions, Operation, QueryResult, checkIdsInSubDocs } from "../utils";
+import { UpdateCertificateBody } from "../model/certificate";
 
 export class OrgService {
     private orgDal: OrgDal;
@@ -61,23 +61,38 @@ export class OrgService {
     }
 
     /* update organization profile */
-    public async updateOrgProfile(id: string, updateBody: UpdateOrgBody
-    ): Promise<IOrganizationDoc> {
-        let org = await this.findOrgById(id);
-        if (!org) {
-            throw new ApiError(httpStatus.NOT_FOUND, "Organization not found");
+    public async updateOrgProfile(OrgId: string, updateBody: UpdateOrgBody): Promise<IOrganizationDoc> {
+        try {
+            await this.orgDal.getOneOrg(OrgId)
+            const { license, certificates, address, ...otherOrgFields } = updateBody
+            if (otherOrgFields && Object.keys(otherOrgFields).length > 0) {
+                await this.orgDal.updateOrg(OrgId, otherOrgFields);
+            }
+            if (license && Object.keys(license).length > 0) {
+                if (!license.id) throw new ApiError(httpStatus.BAD_REQUEST, `license id is required`)
+                const isValidLicenseIds = await checkIdsInSubDocs(Organization, OrgId, 'license', [license.id])
+                if (isValidLicenseIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidLicenseIds.message)
+
+                await this.orgDal.updateOrg(OrgId, {
+                    license
+                }, Operation.UPDATE)
+            }
+            if (address) {
+                if (!address.id) throw new ApiError(httpStatus.BAD_REQUEST, `address id is required`)
+                const isValidAddressIds = await checkIdsInSubDocs(Organization, OrgId, 'address', [address.id])
+                if (isValidAddressIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidAddressIds.message)
+
+                await this.orgDal.updateOrg(OrgId, {
+                    address
+                }, Operation.UPDATE)
+            }
+            const latestOrgProfile = await this.orgDal.getOneOrg(OrgId)
+
+            return latestOrgProfile
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While updating Organization Profile");
         }
-        if (updateBody.name && (await Organization.isNameTaken(updateBody.name))) {
-            throw new ApiError(httpStatus.BAD_REQUEST, "Name is already taken");
-        }
-        if (
-            updateBody.tinNo &&
-            (await Organization.isTinNumberTaken(updateBody.tinNo))
-        ) {
-            throw new ApiError(httpStatus.BAD_REQUEST, "Tin Number is already taken");
-        }
-        org = await this.orgDal.updateOrg(new mongoose.Types.ObjectId(id), updateBody);
-        return org;
     }
     /* delete org */
     public async deleteOrg(id: string): Promise<IOrganizationDoc> {
@@ -85,27 +100,42 @@ export class OrgService {
 
     }
 
+    /**
+     * --------------------------------------------------------------------------------------------------------------------
+     * the following methods are only for certificates
+     * --------------------------------------------------------------------------------------------------------------------
+     */
+
     /* Add new certificate to organization profile */
-    public async addCertificate(
-        id: string,
-        certBody: NewCertificate
-    ): Promise<IOrganizationDoc> {
-        let org = await this.findOrgById(id);
-        if (!org) {
-            throw new ApiError(httpStatus.NOT_FOUND, "Organization not found");
-        }
-        org = await this.orgDal.addCertificate(new mongoose.Types.ObjectId(id), certBody);
-        return org;
+    public async addCertificate(orgId: string, certBody: UpdateCertificateBody[]): Promise<IOrganizationDoc> {
+        await this.orgDal.getOneOrg(orgId)
+        const org = await this.orgDal.updateOrg(orgId, {
+            certificates: certBody,
+        }, Operation.ADD)
+        return org
+    }
+    /* update existing certificates to organization profile */
+    public async updateCertificate(orgId: string, certBody: UpdateCertificateBody[]): Promise<IOrganizationDoc> {
+        await this.orgDal.getOneOrg(orgId)
+        const certificateIds = certBody.map((certificate) => certificate.id)
+        const isValidCertificateIds = await checkIdsInSubDocs(Organization, orgId, 'certificates', certificateIds)
+        if (isValidCertificateIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidCertificateIds.message)
+        const org = await this.orgDal.updateOrg(orgId, {
+            certificates: certBody,
+        }, Operation.UPDATE)
+        return org
     }
 
     /* Remove certificate from organization profile */
-    public async removeCertificate(orgId: string, certId: string): Promise<IOrganizationDoc> {
-        let org = await this.findOrgById(orgId);
-        if (!org) {
-            throw new ApiError(httpStatus.NOT_FOUND, "Organization not found");
-        }
-        org = await this.orgDal.removeCertificate(new mongoose.Types.ObjectId(orgId), new mongoose.Types.ObjectId(certId));
-        return org;
+    public async deleteCertificates(orgId: string, certBody: UpdateCertificateBody[]): Promise<IOrganizationDoc> {
+        await this.orgDal.getOneOrg(orgId)
+        const certificateIds = certBody.map((certificate) => certificate.id)
+        const isValidCertificateIds = await checkIdsInSubDocs(Organization, orgId, 'certificates', certificateIds)
+        if (isValidCertificateIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidCertificateIds.message)
+        const org = await this.orgDal.updateOrg(orgId, {
+            certificates: certBody,
+        }, Operation.DELETE)
+        return org
     }
 
 }

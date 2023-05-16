@@ -20,14 +20,26 @@ export class OrgRouter {
         this.router.route('/').get(validate(orgValidator.getOrgs), this.orgController.getOrgs);
         // get organization by id
         this.router.route('/:orgId').get(validate(orgValidator.getOrg), this.orgController.getOrg);
-        // update organization by id
+        /**
+         * ----------------------------------------------------------------------------------------------------
+         * update organization by id: this end point is used to update organization profile except certificates
+         * ----------------------------------------------------------------------------------------------------
+         */
         this.router.route('/:orgId').patch(validate(orgValidator.updateOrg), this.orgController.updateOrg);
         // delete organization by id
         this.router.route('/:orgId').delete(validate(orgValidator.deleteOrg), this.orgController.deleteOrg);
-        // // add certificate to organization by id
-        // this.router.route('/addCert/:orgId').patch(validate(certValidator.createCert), this.orgController.addCertificate);
-        // // remove certificate from organization by id
-        // this.router.route('/removeCert/:orgId/:certId').patch(validate(certValidator.deleteCert), this.orgController.removeCertificate);
+
+        /**
+         * ----------------------------------------------------------------------------------------------------
+         * only certificates end points
+         * ----------------------------------------------------------------------------------------------------
+         */
+        // add certificate to organization by org id
+        this.router.route('/:orgId/addCert').post(validate(orgValidator.addCertificates), this.orgController.addCertificate);
+        // update certificate to organization by org id
+        this.router.route('/:orgId/updateCert').patch(validate(orgValidator.updateCertificates), this.orgController.updateCertificate);
+        // delete certificate from organization by id
+        this.router.route('/:orgId/deleteCerts').delete(validate(orgValidator.deleteCert), this.orgController.deleteCertificates);
 
         return this.router;
     }

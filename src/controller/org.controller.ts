@@ -49,14 +49,20 @@ export class OrgController {
     })
     public addCertificate = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         if (typeof req.params.orgId === 'string') {
-            const org = await this.orgService.addCertificate(req.params.orgId, req.body);
+            const org = await this.orgService.addCertificate(req.params.orgId, req.body.certificates);
+            res.send(org);
+        }
+    })
+    public updateCertificate = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (typeof req.params.orgId === 'string') {
+            const org = await this.orgService.updateCertificate(req.params.orgId, req.body.certificates);
             res.send(org);
         }
     })
 
-    public removeCertificate = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        if (typeof req.params.orgId === 'string' && typeof req.params.certId === 'string') {
-            const org = await this.orgService.removeCertificate(req.params.orgId, req.params.certId);
+    public deleteCertificates = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (typeof req.params.orgId === 'string') {
+            const org = await this.orgService.deleteCertificates(req.params.orgId, req.body.certificates);
             res.send(org);
         }
     })

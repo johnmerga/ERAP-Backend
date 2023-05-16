@@ -1,10 +1,10 @@
 import { Model, Document } from "mongoose";
 import { QueryResult } from "../../utils";
 import { NewLicense } from "../license";
-import {  NewCertificate } from "../certificate";
+import { NewCertificate, UpdateCertificateBody } from "../certificate";
 import { NewAddress } from "../address";
-import {ORG_SECTOR_TYPE,ORG_TYPE} from './org.type'
-import {ORG_STATUS} from './org.status'
+import { ORG_SECTOR_TYPE, ORG_TYPE } from './org.type'
+import { ORG_STATUS } from './org.status'
 
 export interface IOrganization {
     name: string;
@@ -22,11 +22,26 @@ export interface IOrganization {
 }
 
 export interface IOrganizationDoc extends IOrganization, Document {
-    
-}
-export type NewOrg = Omit<IOrganization,'rating' | 'createdAt' | 'updatedAt' >
 
-export type UpdateOrgBody = Partial<IOrganization> 
+}
+export type NewOrg = Omit<IOrganization, 'rating' | 'createdAt' | 'updatedAt'>
+
+export type UpdateOrgBody = Partial<Omit<IOrganization, 'license' | 'certificates' | 'address'>> & Partial<{
+    license?: UpdateCertificateBody,
+    certificates?: UpdateCertificateBody[],
+    address?: UpdateCertificateBody
+}>
+
+//test 
+// const testOrg: UpdateOrgBody = {
+//     name: 'test',
+//     address: {
+//         certNumber: 'test',
+//     },
+//     license: {
+//         name: 'test',
+//     }
+// }
 
 export interface OrganizationModel extends Model<IOrganizationDoc> {
     isNameTaken(name: string): Promise<boolean>;

@@ -27,6 +27,20 @@ export class SubmissionRouter {
 
         // populate answers with question
         this.router.route('/:submissionId/answers').get(validate(submissionValidator.getSubmission), this.submissionController.getSubmissionWithQuestion)
+
+        /**
+         * ----------------------------------------------------------------------------------------------------
+         * the following routes are only for answers
+         * ----------------------------------------------------------------------------------------------------
+         */
+        // add submission answers
+        this.router.route('/:submissionId/addAnswers').post(validate(submissionValidator.addAnswers), this.submissionController.addAnswers)
+        // update submission answers
+        this.router.route('/:submissionId/updateAnswers').patch(validate(submissionValidator.updateAnswers), this.submissionController.updateAnswers)
+        // delete submission answers
+        this.router.route('/:submissionId/deleteAnswers').delete(validate(submissionValidator.deleteAnswers), this.submissionController.deleteAnswers)
+
+
         return this.router
     }
 }

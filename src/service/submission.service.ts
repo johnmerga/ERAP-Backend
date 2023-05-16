@@ -3,7 +3,7 @@ import { AnswerEvaluation, IAnswer, IAnswerDoc, ISubmission } from "../model/sub
 import { ApiError } from "../errors";
 import httpStatus from "http-status";
 import { ISubmissionDoc, Submission, UpdateSubmissionBody } from "../model/submission";
-import { IOptions, Operation, QueryResult, subDocumentOperationIdentifier } from "../utils";
+import { IOptions, Operation, QueryResult, } from "../utils";
 import { Tender } from "../model/tender";
 import { Organization } from "../model/organization";
 import { IFormDoc, IFormFieldsDoc, Form } from "../model/form";
@@ -14,19 +14,6 @@ export class SubmissionService {
     private submissionDAL: SubmissionDAL
     constructor() {
         this.submissionDAL = new SubmissionDAL()
-    }
-    // check if questionIds are valid
-    async checkQuestionIds(questionIds: string[]): Promise<boolean> {
-        try {
-            const questions = await Form.find({ "fields._id": { $in: questionIds } })
-            if (questions.length !== questionIds.length) {
-                throw new ApiError(httpStatus.BAD_REQUEST, "Invalid Question Ids")
-            }
-            return true
-        } catch (error) {
-            if (error instanceof ApiError) throw error
-            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While checking Question Ids")
-        }
     }
     //checker function for if the bidId,formId, orgId are valid
     async checkBidFormOrg({ tenderId, formId, orgId }: Partial<Record<'orgId' | 'formId' | 'tenderId', string>>): Promise<boolean> {
@@ -84,14 +71,13 @@ export class SubmissionService {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While querying Submissions")
         }
     }
-    // update submission
+    /**
+     * this function is used to update the submission except the answers
+     */
     async updateSubmission(submissionId: string, update: UpdateSubmissionBody): Promise<ISubmissionDoc> {
         try {
-            let submission = await this.submissionDAL.findSubmission(submissionId)
-            if (!submission) {
-                throw new ApiError(httpStatus.BAD_REQUEST, "Submission not found")
-            }
-            //
+            const submission = await this.submissionDAL.findSubmission(submissionId)
+
             await this.checkBidFormOrg({
                 formId: update.formId,
                 orgId: update.orgId,
@@ -101,53 +87,9 @@ export class SubmissionService {
             const { answers, ...rest } = update
             // check if rest is not empty
             if (rest && Object.keys(rest).length > 0) {
-                await Submission.updateOne({ _id: submissionId }, { $set: rest })
+                return await submission.set(rest).save()
             }
-            /*
-             */
-            // checking if the questionIds and question ids are valid
-            if (update.answers && update.answers.length > 0) {
-                const operations = subDocumentOperationIdentifier(update.answers)
-                const submissionAnswerIds = update.answers.map((answer) => answer.id)
-
-                // check if the ids of the answers are valid
-                if (submissionAnswerIds[0]) {
-                    const isValidAnswerIds = await checkIdsInSubDocs(Submission, submissionId, 'answers', submissionAnswerIds)
-                    if (isValidAnswerIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidAnswerIds.message)
-                }
-                // check if the update is to delete answers
-                if (operations.listsToBeDeleted.length > 0) {
-                    //
-                    return await this.submissionDAL.updateSubmission(submissionId, {
-                        answers: operations.listsToBeDeleted as IAnswer[]
-                    }, Operation.DELETE)
-                }
-
-                // check if the ids of questions id are valid
-                const submissionsAnswersQuestionsId = update.answers.map((answer) => answer.questionId)
-                if (submissionsAnswersQuestionsId[0]) {
-                    const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionsAnswersQuestionsId)
-                    if (isValidQuestionIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidQuestionIds.message)
-                } submissionsAnswersQuestionsId
-
-                // check if the update is to update answers
-                if (operations.listsToBeUpdated.length > 0) {
-                    return await this.submissionDAL.updateSubmission(submissionId, {
-                        answers: operations.listsToBeUpdated as IAnswer[]
-                    }, Operation.UPDATE)
-                }
-                // check if the questionIds are valid
-                if (!submissionsAnswersQuestionsId[0]) throw new ApiError(httpStatus.BAD_REQUEST, "Invalid Question Ids")
-                // check if the update is to add answers
-                if (operations.listsToBeAdded.length > 0) {
-
-                    return await this.submissionDAL.updateSubmission(submissionId, {
-                        answers: operations.listsToBeAdded as IAnswer[]
-                    }, Operation.ADD)
-                }
-            }
-            submission = await this.submissionDAL.findSubmission(submissionId)
-            return submission
+            throw new ApiError(httpStatus.BAD_REQUEST, "submission update failed: unhandled error")
         } catch (error) {
             if (error instanceof ApiError) throw error
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While updating Submission")
@@ -218,6 +160,71 @@ export class SubmissionService {
         } catch (error) {
             if (error instanceof ApiError) throw error
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While populating answers with question")
+        }
+    }
+
+    /**
+     * ----------------------------------------------------------------------------------------------------
+     * the following functions are only for answers
+     * ----------------------------------------------------------------------------------------------------
+     */
+
+    // add submission answers
+    async addAnswers(submissionId: string, answers: IAnswer[]): Promise<ISubmissionDoc> {
+        try {
+            const submission = await this.findSubmission(submissionId)
+            // check if the questionIds are valid
+            const submissionsAnswersQuestionsIds = answers.map((answer) => answer.questionId)
+            const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionsAnswersQuestionsIds)
+            if (isValidQuestionIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidQuestionIds.message)
+            // add answers
+            return await this.submissionDAL.updateSubmission(submissionId, {
+                answers
+            }, Operation.ADD)
+
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "system Error: Error Happened While adding answers")
+        }
+    }
+    // update submission answers
+    async updateAnswers(submissionId: string, answers: IAnswer[]): Promise<ISubmissionDoc> {
+        try {
+            const submission = await this.findSubmission(submissionId)
+            //check if the answerIds are valid
+            const submissionAnswersIds = submission.answers.map((answer) => answer.id)
+            const isValidAnswerIds = await checkIdsInSubDocs(Submission, submissionId, 'answers', submissionAnswersIds)
+            if (isValidAnswerIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidAnswerIds.message)
+            // check if the questionIds are valid
+            const submissionsAnswersQuestionsIds = answers.map((answer) => answer.questionId)
+            const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionsAnswersQuestionsIds)
+            if (isValidQuestionIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidQuestionIds.message)
+            // update answers
+            return await this.submissionDAL.updateSubmission(submissionId, {
+                answers: answers as IAnswer[]
+            }, Operation.UPDATE)
+
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "system Error: Error Happened While updating answers")
+        }
+    }
+    // delete submission answers
+    async deleteAnswers(submissionId: string, answerIds: IAnswer[]): Promise<ISubmissionDoc> {
+        try {
+            const submission = await this.findSubmission(submissionId)
+            //check if the answerIds are valid
+            const submissionAnswersIds = submission.answers.map((answer) => answer.id)
+            const isValidAnswerIds = await checkIdsInSubDocs(Submission, submissionId, 'answers', submissionAnswersIds)
+            if (isValidAnswerIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidAnswerIds.message)
+            // delete answers
+            return await this.submissionDAL.updateSubmission(submissionId, {
+                answers: answerIds
+            }, Operation.DELETE)
+
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "system Error: Error Happened While deleting answers")
         }
     }
 }
