@@ -12,7 +12,9 @@ export interface IAddress {
 export interface IAddressDoc extends IAddress, Document {
 }
 export type NewAddress = Omit<IAddress, 'createdAt' | 'updatedAt'>
-export type UpdateAddressBody = Partial<IAddress>
+export type UpdateAddressBody = Partial<Omit<IAddress, 'createdAt' | 'updatedAt'>> & {
+    id: string
+}
 
 export interface AddressModel extends Model<IAddressDoc> {
 }

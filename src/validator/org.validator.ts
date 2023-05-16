@@ -2,26 +2,29 @@ import joi from 'joi';
 import { NewOrg, ORG_SECTOR_TYPE, ORG_STATUS, ORG_TYPE } from '../model/organization';
 import Joi from 'joi';
 import { capitalizeFirstLetter, objectId } from './custom';
-import { NewLicense } from '../model/license';
-import { NewAddress } from '../model/address';
-import { NewCertificate } from '../model/certificate';
+import { UpdateLicenseBody } from '../model/license';
+import { UpdateAddressBody } from '../model/address';
+import { UpdateCertificateBody } from '../model/certificate';
 
 // new license validator
-const createLicenseBody: Record<keyof NewLicense, any> = {
+const createLicenseBody: Record<keyof UpdateLicenseBody, any> = {
+    id: joi.custom(objectId).optional(),
     name: joi.string().lowercase().trim(),
     licenseNumber: joi.string().trim(),
     expDate: joi.date(),
     photo: joi.string(),
 }
 // new Address validator
-const createAddressBody: Record<keyof NewAddress, any> = {
+const createAddressBody: Record<keyof UpdateAddressBody, any> = {
+    id: joi.custom(objectId).optional(),
     city: joi.string().trim().custom(capitalizeFirstLetter),
     subcity: joi.string().trim().custom(capitalizeFirstLetter),
     woreda: joi.string().trim().custom(capitalizeFirstLetter),
     telephoneNum: joi.string().trim(),
 }
 // new certificate validator
-const createCertBody: Record<keyof NewCertificate, any> = {
+const createCertBody: Record<keyof UpdateCertificateBody, any> = {
+    id: joi.custom(objectId),
     name: joi.string().trim().custom(capitalizeFirstLetter),
     certNumber: joi.string().trim(),
     photo: joi.string(),
@@ -67,15 +70,56 @@ export const getOrg = {
         orgId: Joi.string().custom(objectId),
     }),
 };
-
+const {certificates,...otherOrgBody}= createOrgBody
 export const updateOrg = {
     params: Joi.object().keys({
         orgId: Joi.required().custom(objectId),
     }),
     body: Joi.object()
-        .keys(createOrgBody)
+        .keys(otherOrgBody)
         .min(1),
 };
+
+// add organization certificates
+export const addCertificates = {
+    params: Joi.object().keys({
+        orgId: Joi.string().custom(objectId),
+    }),
+    body: {
+        certificates: Joi.array().items(joi.object().required().keys({
+            name: createCertBody.name,
+            certNumber: createCertBody.certNumber,
+            photo: createCertBody.photo,
+        })).options({
+            presence: "required"
+        }).required(),
+    }
+}
+// update organization certificates
+export const updateCertificates = {
+    params: Joi.object().keys({
+        orgId: Joi.string().custom(objectId),
+    }),
+    body: {
+        certificates: Joi.array().items(joi.object().required().keys(createCertBody)).options({
+            presence: "required"
+        }).required(),
+
+    }
+}
+// delete organization certificates
+export const deleteCert = {
+    params: Joi.object().keys({
+        orgId: Joi.string().custom(objectId),
+    }),
+    body: {
+        certificates: Joi.array().items(joi.object().required().keys({
+            id: createCertBody.id,
+        })).options({
+            presence: "required"
+        }).required(),
+    },
+}
 
 export const deleteOrg = {
     params: Joi.object().keys({
