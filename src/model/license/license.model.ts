@@ -12,7 +12,9 @@ export interface ILicense {
 export interface ILicenseDoc extends ILicense, Document {
 }
 export type NewLicense = Omit<ILicense, 'createdAt' | 'updatedAt'>
-export type UpdateLicenseBody = Partial<ILicense>
+export type UpdateLicenseBody = Omit<ILicense, 'createdAt' | 'updatedAt'> & {
+    id: string;
+}
 
 export interface LicenseModel extends Model<ILicenseDoc> {
 }

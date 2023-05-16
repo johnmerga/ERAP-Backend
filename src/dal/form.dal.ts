@@ -1,6 +1,7 @@
 import { Form, NewForm, UpdateFormBody, IFormDoc } from "../model/form";
 import { ApiError } from "../errors";
 import httpStatus from "http-status";
+import { Operation, updateSubDocuments } from "../utils";
 
 export class FormDal {
 
@@ -38,19 +39,37 @@ export class FormDal {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while fetching forms')
         }
     }
-    async updateForm(id: string, update: UpdateFormBody): Promise<IFormDoc> {
+    async updateForm(formId: string, update: UpdateFormBody, fieldsOperation?: Operation): Promise<IFormDoc> {
         try {
-            const form = await Form.findById(id)
-            if (!form) {
-                throw new ApiError(httpStatus.NOT_FOUND, 'Form not found')
+
+            const { fields, ...otherFields } = update
+            if (otherFields && (!fields || !fields[0])) {
+                const form = await this.getForm(formId)
+                await form.set(otherFields).save()
+                return form
             }
-            form.set(update)
-            return form.save()
+
+            if (fields && fields.length > 0) {
+                const subDocUpdates = fields.map(({ id, ...otherQuestionFields }) => ({
+                    id,
+                    update: {
+                        _id: id,
+                        ...otherQuestionFields
+                    }
+                }))
+                const isSubDocSaved = await updateSubDocuments(Form, formId, 'fields', subDocUpdates, fieldsOperation ?? Operation.UPDATE)
+                if (isSubDocSaved instanceof Error) {
+                    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, isSubDocSaved.message)
+                }
+                return isSubDocSaved
+            }
+            throw new ApiError(httpStatus.BAD_REQUEST, 'form not updated: unhanded error')
+
         } catch (error) {
             if (error instanceof ApiError) {
                 throw error
             }
-            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while updating form')
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'system error: something went wrong while updating form')
 
         }
     }

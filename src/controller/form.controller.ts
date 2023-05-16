@@ -10,7 +10,7 @@ export class FormController {
         this.formService = new FormService()
     }
     createForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        
+
         req.body.bidId = new mongoose.Types.ObjectId()  // <--only for testing, this should be deleted later
         const form = await this.formService.createForm(req.body)
         res.status(httpStatus.CREATED).send(form)
@@ -20,7 +20,7 @@ export class FormController {
         res.status(httpStatus.OK).send(form)
     })
     queryForms = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const filter = pick(req.query, ['type','tenderId'])
+        const filter = pick(req.query, ['type', 'tenderId'])
         const options = req.query
         const result = await this.formService.queryForms(filter, options)
         res.status(httpStatus.OK).send(result)
@@ -32,5 +32,26 @@ export class FormController {
     deleteForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         await this.formService.deleteForm(req.params.formId)
         res.status(httpStatus.OK).send()
+    })
+
+
+    /**
+     * ----------------------------------------------------------------------------------------------------
+     * only form fields 
+     * ----------------------------------------------------------------------------------------------------
+     */
+    addFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const form = await this.formService.addFormFields(req.params.formId, req.body.fields)
+        res.status(httpStatus.OK).send(form)
+    }
+    )
+
+    updateFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const form = await this.formService.updateFormFields(req.params.formId, req.body.fields)
+        res.status(httpStatus.OK).send(form)
+    })
+    deleteFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const form = await this.formService.deleteFormFields(req.params.formId, req.body.fields)
+        res.status(httpStatus.OK).send(form)
     })
 }

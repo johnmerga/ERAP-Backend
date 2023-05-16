@@ -4,6 +4,7 @@ import { NewForm, FormQuestionType, FormType, IFormFields } from "../model/form"
 
 // a single question validation
 const formQuestionBody: Record<keyof IFormFields, any> = {
+    id: joi.string().custom(objectId).trim(),
     question: joi.string().trim(),
     type: joi.string().valid(...Object.values(FormQuestionType)).insensitive(),
     options: joi.array().items(joi.string()).when('type', {
@@ -43,12 +44,12 @@ export const getForms = {
         populate: joi.string(),
     })
 }
-
+const { fields, ...otherFormBody } = formBody
 export const updateForm = {
     params: joi.object().keys({
         formId: joi.string().custom(objectId),
     }),
-    body: joi.object().keys(formBody).min(1),
+    body: joi.object().keys(otherFormBody).min(1),
 }
 
 export const deleteForm = {
@@ -56,3 +57,45 @@ export const deleteForm = {
         formId: joi.string().custom(objectId),
     }),
 }
+
+/**
+ * ----------------------------------------------------------------------------------------------------
+ * only form fields validation
+ *  ----------------------------------------------------------------------------------------------------
+ */
+const { id, ...otherFormQuestionBody } = formQuestionBody
+export const addFormFields = {
+    params: joi.object().keys({
+        formId: joi.string().custom(objectId),
+    }),
+    body: joi.object().keys({
+        fields: joi.array().items(
+            joi.object().keys(otherFormQuestionBody).options({ presence: 'required' })
+        ).required(),
+    })
+}
+
+export const updateFormFields = {
+    params: joi.object().keys({
+        formId: joi.string().custom(objectId),
+    }),
+    body: joi.object().keys({
+        fields: joi.array().items(
+            joi.object().keys(formQuestionBody).options({ presence: 'required' })
+        ).required(),
+    })
+}
+
+export const deleteFormFields = {
+    params: joi.object().keys({
+        formId: joi.string().custom(objectId),
+    }),
+    body: joi.object().keys({
+        fields: joi.array().items(
+            joi.object().keys({
+                id: joi.string().custom(objectId).trim().required(),
+            }).options({ presence: 'required' })
+        ).required(),
+    })
+}
+
