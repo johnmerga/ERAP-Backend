@@ -37,29 +37,16 @@ export const getSubmissions = {
         populate: Joi.string(),
     })
 }
-
+const { answers, ...otherSubmissionBody } = submissionBody
 export const updateSubmission = {
     params: Joi.object().keys({
         submissionId: Joi.string().custom(objectId),
     }),
     body: Joi.object().keys({
-        ...submissionBody,
-        answers: Joi.array().items(Joi.object().keys({
-            ...answerBody,
-            id: Joi.string().custom(objectId).trim(),
-        })).min(1),
+        ...otherSubmissionBody,
     }).min(1)
 }
 
-// delete answers
-export const deleteAnswers = {
-    params: Joi.object().keys({
-        submissionId: Joi.string().custom(objectId)
-    }),
-    body: Joi.object().keys({
-        answerIds: Joi.array().items(Joi.string().custom(objectId)).min(1)
-    }).options({ presence: 'required' })
-}
 
 export const deleteSubmission = {
     params: Joi.object().keys({
@@ -80,3 +67,43 @@ export const evaluateSubmission = {
     })
 }
 
+/**
+ * ----------------------------------------------------------------------------------------------------
+ * validation submission answers
+ * ----------------------------------------------------------------------------------------------------
+ */
+export const addAnswers = {
+    params: Joi.object().keys({
+        submissionId: Joi.string().custom(objectId),
+    }),
+    body: Joi.object().keys({
+        answers: Joi.array().items(Joi.object().keys(answerBody)).min(1),
+    }).options({ presence: 'required' })
+}
+
+export const updateAnswers = {
+    params: Joi.object().keys({
+        submissionId: Joi.string().custom(objectId),
+    }),
+    body: Joi.object().keys({
+        answers: Joi.array().items(Joi.object().keys({
+            ...answerBody,
+            id: Joi.string().custom(objectId).trim(),
+        }).options({
+            presence: 'required'
+        })).min(1),
+    }).required()
+}
+export const deleteAnswers = {
+    params: Joi.object().keys({
+        submissionId: Joi.string().custom(objectId),
+    }),
+    body: Joi.object().keys({
+        answers: Joi.array().items(Joi.object().keys({
+            id: Joi.string().custom(objectId).trim(),
+        }).options({
+            presence: 'required'
+        })).min(1),
+    }).required()
+
+}
