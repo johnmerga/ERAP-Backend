@@ -29,11 +29,12 @@ export class UserService {
 
 
     /* create user */
-    public async create(userBody: NewUser): Promise<IUserDoc> {
+    public async create(userBody: NewUser, owner: IUserDoc): Promise<IUserDoc> {
         // check if email is taken
         if (await this.isEmailTaken(userBody.email)) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
         }
+        userBody.orgId = new mongoose.Types.ObjectId(owner.orgId)
         return this.userDal.create(userBody);
     }
     /* get user  */

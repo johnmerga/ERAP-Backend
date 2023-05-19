@@ -21,7 +21,8 @@ export interface IUserDoc extends IUser, Document {
     isPasswordMatch(password: string): Promise<boolean>;
 }
 
-export type NewUser = Omit<IUser, 'roles' | 'isVerified' | 'status' | 'orgId' | 'createdAt' | 'updatedAt' | 'permissions'>
+export type NewUser = Omit<IUser, 'isVerified' | 'status' | 'createdAt' | 'updatedAt' | 'permissions'>
+export type NewUserValidation = Omit<NewUser,'orgId'>
 export type NewAdmin = Omit<IUser, 'roles' | 'isVerified' | 'status' | 'orgId' | 'createdAt' | 'updatedAt' | 'permissions'>
 
 export type UpdateUserBody = Partial<IUser>
