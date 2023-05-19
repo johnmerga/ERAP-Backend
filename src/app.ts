@@ -1,13 +1,29 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import { unless } from 'express-unless';
 import { morganMiddleware } from './logger';
 import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, ChapaRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
 import { SubmissionRouter } from './router/submission.router';
+import { authenticateMiddleware } from './service/auth';
 
+const auth = (authenticateMiddleware as any)
+auth.unless = unless
+const path = [
+    '/api/v1/auth/login',
+    '/api/v1/auth/register',
+    '/api/v1/auth/verify-email',
+    '/api/v1/auth/forgot-password',
+    '/api/v1/auth/reset-password',
+    '/api/v1/auth/refresh-token',
+    '/api/v1/auth/logout',
+    '/api/v1/test',
+    { url: '/api/v1/orgs', methods: ['GET'] },
+    { url: '/api/v1/tenders', methods: ['GET'] },
+]
 class App {
     public app: Express;
     //routes
@@ -49,6 +65,8 @@ class App {
         // enable cors
         this.app.use(cors());
         this.app.use('*', cors())
+        // require auth middleware for all routes except the ones in path
+        this.app.use(auth.unless({ path: path }));
         // telling express server to trust whatever our nginx server is adding to header
         this.app.set('trust proxy', true);
         this.app.use(express.json());
