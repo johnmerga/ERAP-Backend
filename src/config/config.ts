@@ -16,7 +16,7 @@ const envVarsSchema = joi.object({
     JWT_ACCESS_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: joi.number().default(30).description('days after which refresh tokens expire'),
     JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which verify email tokens expire'),
-    JWT_RESET_PASSWORD_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which reset password tokens xpire'),
+    JWT_RESET_PASSWORD_EXPIRATION_MINUTES: joi.number().default(30).description('minutes after which reset password tokens expire'),
     BASE_URL: joi.string().required().description('Base url for the application').default('http://localhost:3000'),
     SMTP_HOST: joi.string().required().description('server that will send the emails'),
     SMTP_PORT: joi.number().required().description('port to connect to the email server'),
