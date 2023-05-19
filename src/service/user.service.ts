@@ -29,11 +29,12 @@ export class UserService {
 
 
     /* create user */
-    public async create(userBody: NewUser): Promise<IUserDoc> {
+    public async create(userBody: NewUser, owner: IUserDoc): Promise<IUserDoc> {
         // check if email is taken
         if (await this.isEmailTaken(userBody.email)) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
         }
+        userBody.orgId = new mongoose.Types.ObjectId(owner.orgId)
         return this.userDal.create(userBody);
     }
     /* get user  */
@@ -46,11 +47,16 @@ export class UserService {
     }
 
     public async findUserByEmail(email: string): Promise<IUserDoc> {
-        const user = await User.findOne({ email });
-        if (!user) {
-            throw new Error('User not found')
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+            }
+            return user;
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'system error: error while finding user by email');
         }
-        return user;
     }
     /* Query for users */
     public async queryUsers(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {

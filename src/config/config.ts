@@ -29,6 +29,8 @@ const envVarsSchema = joi.object({
     // payment
     CHAPA_PUB_KEY: joi.string().required().description('Chapa public key'),
     CHAPA_SECRETE_KEY: joi.string().required().description('Chapa secrete key'),
+    CHAPA_INITIATE_PAYMENT_URL: joi.string().required().description('Chapa initiate payment url'),
+    CHAPA_VERIFY_PAYMENT_URL: joi.string().required().description('Chapa verify payment url'),
 
 }).unknown().required();
 
@@ -79,6 +81,8 @@ const config = {
         chapa: {
             pubKey: envVars.CHAPA_PUB_KEY,
             secreteKey: envVars.CHAPA_SECRETE_KEY,
+            chapaInitiatePaymentUrl: envVars.CHAPA_INITIATE_PAYMENT_URL,
+            chapaVerifyPaymentUrl: envVars.CHAPA_VERIFY_PAYMENT_URL,
         }
     },
     /*  */

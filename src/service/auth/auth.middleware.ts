@@ -5,13 +5,14 @@ import config from '../../config/config';
 import { ApiError } from '../../errors';
 import HttpStatus from 'http-status';
 import { UserService } from '../user.service';
+import { IPayload } from '../../model/token';
 
 export const authenticateMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const token = req.header('Authorization')!.replace('Bearer ', '');
-        const decoded = verify(token, config.jwt.secret);
-        if (typeof decoded.sub !== 'string') {
+        const decoded = verify(token, config.jwt.secret)
+        if (!decoded || typeof decoded.sub !== 'string') {
             throw new ApiError(HttpStatus.BAD_REQUEST, 'bad user')
         }
         const userService = new UserService()
@@ -22,6 +23,7 @@ export const authenticateMiddleware = async (req: Request, res: Response, next: 
         const userPermissionList = await userService.getUserPermissions(user.id)
         req.permissions = userPermissionList
         req.user = user;
+        req.token = decoded as IPayload;
         next();
     } catch (error) {
         next(new ApiError(HttpStatus.UNAUTHORIZED, 'Please authenticate.'));

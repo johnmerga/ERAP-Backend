@@ -8,5 +8,5 @@ export { paginate }
 export { mergeNestedObjects } from "./mergeObj"
 export * from "./updateSubDocs"
 export * from "./subDocIdsCheck"
-
+export * from './exceptFunction'
 

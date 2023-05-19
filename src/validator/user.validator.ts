@@ -1,16 +1,19 @@
 import joi from 'joi';
-import { NewUser, Role } from '../model/user';
+import { Role } from '../model/user';
 import Joi from 'joi';
 import { capitalizeFirstLetter, objectId, password } from './custom';
+import { NewUserValidation } from '../model/user/user.model';
+
 
 // new user validator
 
-const createUserBody: Record<keyof NewUser, any> = {
+const createUserBody: Record<keyof NewUserValidation, any> = {
     name: joi.string().custom(capitalizeFirstLetter).trim(),
     email: joi.string().email().lowercase().trim(),
     password: joi.string().custom(password).trim(),
     address: joi.string().custom(capitalizeFirstLetter).trim(),
     phone: joi.string().trim(),
+    roles: joi.array().items(joi.string().valid(...Object.values(Role)).insensitive().trim()),
 }
 
 export const createUser = {

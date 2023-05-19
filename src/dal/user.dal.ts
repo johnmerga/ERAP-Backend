@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument } from "mongoose";
 
-import { UpdateUserBody, User } from "../model/user";
+import { NewAdmin, UpdateUserBody, User } from "../model/user";
 import { ApiError } from "../errors"
 import httpStatus from "http-status";
 import { NewUser, IUserDoc } from "../model/user";
@@ -8,7 +8,7 @@ import { NewUser, IUserDoc } from "../model/user";
 
 export class UserDal {
 
-    async create(user: NewUser): Promise<HydratedDocument<IUserDoc>> {
+    async create(user: NewUser | NewAdmin): Promise<HydratedDocument<IUserDoc>> {
 
         const newUser = new User(user).save()
             .then(function (user) {

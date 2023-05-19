@@ -6,6 +6,7 @@ import { UserService } from "../service";
 import { TokenService } from "../service/token.service";
 import { EmailService } from "../service/email";
 import { Logger } from "../logger";
+import { ApiError } from "../errors";
 // import config from "../config/config";
 
 
@@ -68,6 +69,9 @@ export class AuthController {
 
     /* send verification  */
     public sendVerificationEmail = catchAsync(async (req: Request, res: Response) => {
+        if (!req.token || req.token.type !== 'access') {
+            throw new ApiError(httpStatus.UNAUTHORIZED, 'Access token is required')
+        }
         if (req.user) {
             if (req.user.isVerified) {
                 res.status(httpStatus.BAD_REQUEST).send('User is already verified')

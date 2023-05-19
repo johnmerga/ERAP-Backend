@@ -12,7 +12,8 @@ export class UserController {
     }
 
     public createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const user = await this.userService.create(req.body);
+        if (!req.user) throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized')
+        const user = await this.userService.create(req.body, req.user);
         res.status(httpStatus.CREATED).send(user);
     });
 
