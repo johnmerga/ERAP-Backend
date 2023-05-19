@@ -2,7 +2,7 @@ import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { morganMiddleware } from './logger';
-import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter } from './router';
+import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, ChapaRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
@@ -30,6 +30,8 @@ class App {
         this.app.use('/api/v1/applicants', new ApplicantRouter().routes());
         // submission routes
         this.app.use('/api/v1/submissions', new SubmissionRouter().routes());
+        // chapa payment routes
+        this.app.use('/api/v1/payment/chapa', new ChapaRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {

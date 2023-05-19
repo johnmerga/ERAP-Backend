@@ -4,3 +4,4 @@ export { OrgController } from './org.controller';
 export * from './form.controller';
 export * from './tender.controller';
 export * from './applicant.controller';
+export * from './chapa.payment.controller';
