@@ -6,6 +6,7 @@ import { ApiError } from '../../errors';
 import HttpStatus from 'http-status';
 import { UserService } from '../user.service';
 import { IPayload } from '../../model/token';
+import { Role } from '../../model/user';
 
 export const authenticateMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -30,7 +31,7 @@ export const authenticateMiddleware = async (req: Request, res: Response, next: 
     }
 }
 
-export const authorizeMiddleware = (reqRoles: string[], reqPermissions: string[]) => {
+export const authorizeMiddleware = (reqRoles: Role[], reqPermissions: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = req.user;
@@ -39,7 +40,8 @@ export const authorizeMiddleware = (reqRoles: string[], reqPermissions: string[]
             }
             console.log(req.user?.permissions)
             // const userPermissionList = await new PermissionService().getAllUserPermissions(user.id)
-            const isRoleMatched = user.roles.every((role) => reqRoles.includes(role))
+            const userRoles = user.roles as Role[]
+            const isRoleMatched = userRoles.some(role => reqRoles.includes(role))
             const isPermissionMatched = reqPermissions.every((permission) => req.permissions?.includes(permission))
             if (!isRoleMatched || !isPermissionMatched) {
                 throw new ApiError(HttpStatus.UNAUTHORIZED, 'You are not authorized to access this resource');

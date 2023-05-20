@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { validate } from "../validator/custom"
 import { userValidator } from "../validator";
 import { authorizeMiddleware } from "../service/auth";
+import { Role } from "../model/user";
 
 export class UserRouter {
     public router: Router;
@@ -18,7 +19,7 @@ export class UserRouter {
         // create user
         this.router.route('/').post(validate(userValidator.createUser), this.userController.createUser);
         // get users 
-        this.router.route('/').get(validate(userValidator.getUsers), authorizeMiddleware(['user', 'procurement'], ['user:update']), this.userController.getUsers);
+        this.router.route('/').get(validate(userValidator.getUsers), authorizeMiddleware([Role.SysAdmin,Role.Admin], ['user:update']), this.userController.getUsers);// this is only for sample
         // get user by id
         this.router.route('/:userId').get(validate(userValidator.getUser), this.userController.getUser);
         // update user by id
