@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IFormDoc, IFormFieldsDoc, IFormFieldsModel, IFormModel } from "./form.model";
+import { IFormDoc, IFormFieldsDoc, IFormFieldsModel, IFormModel, IFormTable, IFormTableModel } from "./form.model";
 import { FormType, FormQuestionType } from "./form.types";
 import { paginate, toJSON } from "../../utils";
 //
@@ -22,6 +22,17 @@ const formFieldSchema = new Schema<IFormFieldsDoc, IFormFieldsModel>({
         required: true,
     },
 })
+// 
+export const formTableSchema = new Schema<IFormTable, IFormTableModel>({
+    row: [{
+        type: String,
+    }],
+    column: [{
+        type: String,
+    }],
+
+})
+formTableSchema.plugin(toJSON);
 
 // 
 const formSchema = new Schema<IFormDoc, IFormModel>({
@@ -44,7 +55,8 @@ const formSchema = new Schema<IFormDoc, IFormModel>({
         required: true,
     },
     fields: [formFieldSchema],
-},{
+    table: [formTableSchema],
+}, {
     timestamps: true
 })
 

@@ -9,16 +9,24 @@ export interface IFormFields {
     required: boolean,
 
 }
-export interface IFormFieldsDoc extends IFormFields, Document { 
+
+export interface IFormFieldsDoc extends IFormFields, Document {
     id: string,
 }
 export interface IFormFieldsModel extends Model<IFormFieldsDoc> { }
+export interface IFormTable {
+    row: string[],
+    column: string[],
+}
+export interface IFormTableDoc extends IFormTable, Document { }
+export interface IFormTableModel extends Model<IFormTableDoc> { }
 export interface IForm {
     title: string,
     description: string,
     tenderId: mongoose.Types.ObjectId,
     type: FormType,
     fields: IFormFields[],
+    table?: IFormTable[],
 }
 
 export interface IFormDoc extends IForm, Document {
