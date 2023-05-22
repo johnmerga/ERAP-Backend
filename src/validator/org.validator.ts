@@ -46,8 +46,22 @@ export const createOrgBody: Record<keyof NewOrg, any> = {
     certificates: joi.array().items(joi.object().keys(createCertBody)),
 }
 
+
+//
+const { certificates, license, address, ...otherOrgBody } = createOrgBody
+const { id: certId, ...otherCertBody } = createCertBody
+const { id: licenseId, ...otherLicenseBody } = createLicenseBody
+const { id: addressId, ...otherAddressBody } = createAddressBody
+
 export const createOrg = {
-    body: joi.object().keys(createOrgBody).options({ presence: "required" }),
+    body: joi.object().keys({
+        ...otherOrgBody,
+        certificates: joi.array().items(
+            joi.object().keys(otherCertBody).options({ presence: 'required' })
+        ),
+        license: joi.object().keys(otherLicenseBody),
+        address: joi.object().keys(otherAddressBody),
+    }).options({ presence: "required", abortEarly: false }),
 }
 
 export const getOrgs = {
@@ -70,7 +84,6 @@ export const getOrg = {
         orgId: Joi.string().custom(objectId),
     }),
 };
-const {certificates,...otherOrgBody}= createOrgBody
 export const updateOrg = {
     params: Joi.object().keys({
         orgId: Joi.required().custom(objectId),
