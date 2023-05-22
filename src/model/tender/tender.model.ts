@@ -15,6 +15,7 @@ export interface ITender {
     bidDeadline: Date,
     closeDate: Date,
     applicants: mongoose.Types.ObjectId[],
+    price: number,
     createdAt: Date,
     updatedAt: Date,
 }
