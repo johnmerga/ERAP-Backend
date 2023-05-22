@@ -21,6 +21,10 @@ const formBody: Record<keyof NewForm, any> = {
     title: joi.string().trim(),
     type: joi.string().valid(...Object.values(FormType)).insensitive(),
     fields: joi.array().items(formQuestionBody),
+    table: joi.array().items(joi.object().keys({
+        row: joi.array().items(joi.string().trim()).required(),
+        column: joi.array().items(joi.string().trim()).required(),
+    })).optional(),
 }
 
 const { fields, ...otherFormBody } = formBody
