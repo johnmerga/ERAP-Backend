@@ -17,6 +17,10 @@ const tenderSchema = new Schema<ITenderDoc, ITenderModel>({
         type: String,
         required: true,
     },
+    price: {
+        type: Number,
+        required: true,
+    },
     type: {
         type: String,
         enum: Object.values(TenderType),

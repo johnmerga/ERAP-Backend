@@ -6,6 +6,7 @@ import { NewForm, FormQuestionType, FormType, IFormFields } from "../model/form"
 const formQuestionBody: Record<keyof IFormFields, any> = {
     id: joi.string().custom(objectId).trim(),
     question: joi.string().trim(),
+    description: joi.string().trim().optional(),
     type: joi.string().valid(...Object.values(FormQuestionType)).insensitive(),
     options: joi.array().items(joi.string()).when('type', {
         is: [FormQuestionType.CHECKBOX, FormQuestionType.RADIO, FormQuestionType.DROPDOWN],

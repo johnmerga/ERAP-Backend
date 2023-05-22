@@ -8,6 +8,9 @@ const formFieldSchema = new Schema<IFormFieldsDoc, IFormFieldsModel>({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+    },
     type: {
         type: String,
         enum: Object.values(FormQuestionType),
