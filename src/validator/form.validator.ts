@@ -23,8 +23,18 @@ const formBody: Record<keyof NewForm, any> = {
     fields: joi.array().items(formQuestionBody),
 }
 
+const { fields, ...otherFormBody } = formBody
+const { id, ...otherFormQuestionBody } = formQuestionBody
+
+
 export const createForm = {
-    body: joi.object().keys(formBody).options({ presence: 'required' })
+    body: joi.object().keys({
+        ...otherFormBody,
+        fields: joi.array().items(
+            joi.object().keys(otherFormQuestionBody).options({ presence: 'required' })
+        ).required(),
+
+    }).options({ presence: 'required' })
 }
 
 export const getForm = {
@@ -44,7 +54,6 @@ export const getForms = {
         populate: joi.string(),
     })
 }
-const { fields, ...otherFormBody } = formBody
 export const updateForm = {
     params: joi.object().keys({
         formId: joi.string().custom(objectId),
@@ -63,7 +72,6 @@ export const deleteForm = {
  * only form fields validation
  *  ----------------------------------------------------------------------------------------------------
  */
-const { id, ...otherFormQuestionBody } = formQuestionBody
 export const addFormFields = {
     params: joi.object().keys({
         formId: joi.string().custom(objectId),
