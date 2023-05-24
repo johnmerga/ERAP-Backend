@@ -1,10 +1,9 @@
-import { NewTender, TenderStatus, TenderType, } from "../model/tender";
+import { NewTenderInputValidator, TenderStatus, TenderType, } from "../model/tender";
 import joi from "joi";
 import { objectId } from "./custom";
 import { ORG_SECTOR_TYPE } from "../model/organization";
 
-const tenderBody: Record<keyof NewTender, any> = {
-    orgId: joi.string().custom(objectId).trim(),
+const tenderBody: Record<keyof NewTenderInputValidator, any> = {
     title: joi.string().trim(),
     description: joi.string().trim(),
     price: joi.number().min(1),
@@ -29,7 +28,7 @@ export const getTender = {
 
 export const getTenders = {
     query: joi.object().keys({
-        orgId: tenderBody.orgId,
+        orgId: joi.string().custom(objectId),
         status: tenderBody.status,
         type: tenderBody.type,
         sector: tenderBody.sector,
@@ -37,6 +36,19 @@ export const getTenders = {
         limit: joi.number().min(1),
         sortBy: joi.string(),
         projectBy: joi.string(),
+    })
+}
+export const getTenderApplicants = {
+    params: joi.object().keys({
+        tenderId: joi.string().custom(objectId),
+    }),
+    query: joi.object().keys({
+        page: joi.number().min(1),
+        limit: joi.number().min(1),
+        sortBy: joi.string(),
+        projectBy: joi.string(),
+        populate: joi.string().valid('orgId.name', 'tenderId.title', 'orgId.name,tenderId.title', 'tenderId.title,orgId.name'),
+
     })
 }
 

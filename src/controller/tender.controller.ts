@@ -1,15 +1,22 @@
-import { TenderService } from "../service";
+import { ApiError } from "../errors";
+import { ApplicantService, TenderService } from "../service";
 import { catchAsync, pick } from "../utils";
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 
 export class TenderController {
     private tenderService: TenderService;
+    private applicantService: ApplicantService;
     constructor() {
         this.tenderService = new TenderService()
+        this.applicantService = new ApplicantService()
     }
     createTender = catchAsync(async (req: Request, res: Response) => {
-        const tender = await this.tenderService.create(req.body)
+        if (!req.user?.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'user with no organization cannot create tender')
+        const tender = await this.tenderService.create({
+            ...req.body,
+            orgId: req.user?.orgId
+        })
         res.status(httpStatus.CREATED).send(tender)
     })
     getTenderById = catchAsync(async (req: Request, res: Response) => {
@@ -23,9 +30,17 @@ export class TenderController {
         res.status(httpStatus.OK).send(tenders)
     })
     getTenderApplicants = catchAsync(async (req: Request, res: Response) => {
-        const applicants = await this.tenderService.getTenderApplicants(req.params.tenderId)
+        const filter = pick(req.query, ['orgId', 'isApplicationSubmitted'])
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate'])
+        const applicants = await this.applicantService.getAllApplicantForOneTender({
+            ...filter,
+            tenderId: req.params.tenderId
+        }, {
+            ...options,
+            populate: `orgId.name,tenderId.title`
+        })
         res.status(httpStatus.OK).send(applicants)
-     })
+    })
     updateTender = catchAsync(async (req: Request, res: Response) => {
         const tender = await this.tenderService.updateTender(req.params.tenderId, req.body)
         res.status(httpStatus.OK).send(tender)
