@@ -16,11 +16,11 @@ export class ApplicantRouter {
     public routes(): Router {
         // create applicant
         this.router.route('/').post(validate(applicantValidator.createApplicant), this.applicantController.createApplicant);
-        // get applicant by id
-        this.router.route('/:applicantId').get(validate(applicantValidator.getApplicant), this.applicantController.getApplicantById);
+        // get applicant by tender id
+        this.router.route('/:tenderId').get(validate(applicantValidator.getApplicants), this.applicantController.getApplicantsByTenderId);
         // delete applicant by id
         this.router.route('/:applicantId').delete(validate(applicantValidator.deleteApplicant), this.applicantController.deleteApplicant);
-        
+
         return this.router;
     }
 }

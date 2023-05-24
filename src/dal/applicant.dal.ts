@@ -1,13 +1,16 @@
 import { Applicant, NewApplicant, IApplicantDoc, ApplicantQuery } from "../model/applicants";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
+import { IOptions, QueryResult } from "../utils";
 
 export class ApplicantDal {
     async create(applicant: NewApplicant): Promise<IApplicantDoc> {
         try {
-            return (await Applicant.create(applicant)).save()
+            const newApplicant = await new Applicant(applicant).save()
+            if (!newApplicant) throw new ApiError(httpStatus.BAD_REQUEST, 'unable to create applicant')
+            return newApplicant
         } catch (error) {
-            throw new Error('error occurred while creating applicant ')
+            throw new Error('system error: occurred while creating applicant ')
         }
     }
     async getApplicant(id: string): Promise<IApplicantDoc> {
@@ -25,18 +28,16 @@ export class ApplicantDal {
 
         }
     }
-    async getApplicants(filter: ApplicantQuery): Promise<IApplicantDoc[]> {
+    async getApplicants(filter: ApplicantQuery, options: IOptions): Promise<QueryResult> {
         try {
-            const applicants = await Applicant.find(filter)
-            if (!applicants || applicants.length === 0) {
-                throw new ApiError(httpStatus.NOT_FOUND, 'no applicants found for this tender')
+            const applicants = await Applicant.paginate(filter, options)
+            if (!applicants) {
+                throw new ApiError(httpStatus.NOT_FOUND, `something went wrong while fetching applicants`)
             }
             return applicants
         } catch (error) {
-            if(error instanceof ApiError){
-                throw error
-            }
-            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while fetching applicants for specific tender')
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'system error: error occurred while fetching applicants')
         }
     }
     async deleteApplicant(id: string): Promise<IApplicantDoc> {

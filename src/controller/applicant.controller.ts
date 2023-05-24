@@ -1,4 +1,4 @@
-import { catchAsync } from "../utils";
+import { catchAsync, pick } from "../utils";
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import { ApplicantService } from "../service";
@@ -12,8 +12,13 @@ export class ApplicantController {
         const applicant = await this.applicantService.create(req.body)
         res.status(httpStatus.CREATED).send(applicant)
     })
-    getApplicantById = catchAsync(async (req: Request, res: Response) => {
-        const applicant = await this.applicantService.getApplicantById(req.params.applicantId)
+    getApplicantsByTenderId = catchAsync(async (req: Request, res: Response) => {
+        const filter = pick(req.query, ['orgId', 'isApplicationSubmitted'])
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate'])
+        const applicant = await this.applicantService.getAllApplicantForOneTender({
+            ...filter,
+            tenderId: req.params.tenderId
+        }, options)
         res.status(httpStatus.OK).send(applicant)
     })
     deleteApplicant = catchAsync(async (req: Request, res: Response) => {
