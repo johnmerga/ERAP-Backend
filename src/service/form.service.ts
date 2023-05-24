@@ -3,20 +3,39 @@ import { FormDal } from "../dal/form.dal";
 import { ApiError } from "../errors";
 import { Form, IFormDoc, IFormFields, NewForm, NewFormFields, UpdateFormBody } from "../model/form";
 import { IOptions, Operation, QueryResult, checkIdsInSubDocs, } from "../utils";
-import { TenderService } from "../service/";
+import { ApplicantService, TenderService } from "../service/";
+import { IUserDoc } from "../model/user";
 export class FormService {
     private formDal: FormDal
     private tenderService: TenderService
+    private applicantService: ApplicantService;
     constructor() {
         this.formDal = new FormDal()
         this.tenderService = new TenderService()
+        this.applicantService = new ApplicantService()
     }
     async createForm(form: NewForm): Promise<IFormDoc> {
         await this.tenderService.getTenderById((form.tenderId).toString())
         return await this.formDal.create(form)
     }
-    async getForm(id: string): Promise<IFormDoc> {
-        return await this.formDal.getForm(id)
+    async getForm(formId: string, user: IUserDoc): Promise<IFormDoc> {
+        try {
+            const form = await this.formDal.getForm(formId)
+            // checking pre condition
+            if (!user.orgId) throw new ApiError(httpStatus.FAILED_DEPENDENCY, `no organization id associated with this user id : [${user.id}]`)
+            if (!form.tenderId) throw new ApiError(httpStatus.PRECONDITION_FAILED, `could't process the form because the form is not linked to any tender`)
+            const tender = await this.tenderService.getTenderById((form.tenderId).toString())
+            if (tender.orgId !== user.orgId.toString()) {
+                const applicant = (await this.applicantService.getByOrgIdAndTenderId(user.orgId.toString(), form.tenderId.toString()))
+                if (applicant.results.length === 0) {
+                    throw new ApiError(httpStatus.PAYMENT_REQUIRED, `payment required`)
+                }
+            }
+            return await this.formDal.getForm(formId)
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: error occured while getting a form with id: [${formId}] `)
+        }
     }
     async queryForms(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
         try {
