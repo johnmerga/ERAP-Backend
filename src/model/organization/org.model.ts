@@ -32,16 +32,6 @@ export type UpdateOrgBody = Partial<Omit<IOrganization, 'license' | 'certificate
     address?: UpdateCertificateBody
 }>
 
-//test 
-// const testOrg: UpdateOrgBody = {
-//     name: 'test',
-//     address: {
-//         certNumber: 'test',
-//     },
-//     license: {
-//         name: 'test',
-//     }
-// }
 
 export interface OrganizationModel extends Model<IOrganizationDoc> {
     isNameTaken(name: string): Promise<boolean>;
