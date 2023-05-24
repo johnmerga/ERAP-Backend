@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { unless } from 'express-unless';
 import { morganMiddleware } from './logger';
-import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, ChapaRouter } from './router';
+import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, PaymentRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
@@ -21,6 +21,7 @@ const path = [
     '/api/v1/auth/refresh-token',
     '/api/v1/auth/logout',
     '/api/v1/test',
+        { url: /^\/api\/v1\/payment\/verify\/.*/, methods: ['GET'] },
     { url: '/api/v1/orgs', methods: ['GET'] },
     { url: '/api/v1/tenders', methods: ['GET'] },
 ]
@@ -47,7 +48,7 @@ class App {
         // submission routes
         this.app.use('/api/v1/submissions', new SubmissionRouter().routes());
         // chapa payment routes
-        this.app.use('/api/v1/payment/chapa', new ChapaRouter().routes());
+        this.app.use('/api/v1/payment', new PaymentRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {
