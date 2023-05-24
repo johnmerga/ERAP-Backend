@@ -1,60 +1,73 @@
-import { randomUUID } from 'crypto'
+// import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 import config from '../../config/config'
-import { Currency, IChapaPaymentInitiationResponse, IChapaPaymentVerificationResponse, IChapaPaymentVerificationResponseData, IPaymentInitiation, } from '../../model/payment/';
+import { Currency, IChapaPaymentInitiationResponse, IChapaPaymentVerificationResponseData, IChapaPaymentInitiation, } from '../../model/payment/';
 import { ApiError } from '../../errors';
 import httpStatus from 'http-status';
 import { Logger } from '../../logger';
 
+
+
 export class chapaService {
-    private secretKey: string;
     constructor() {
-        this.secretKey = config.payment.chapa.secreteKey;
+        this.axiosInterceptor()
     }
-    async paymentInitiation(paymentInitiation: IPaymentInitiation): Promise<IChapaPaymentInitiationResponse> {
+    // axios interceptor
+    async axiosInterceptor() {
+        axios.interceptors.request.use((axiosConfig) => {
+            axiosConfig.headers.Authorization = `Bearer ${config.payment.chapa.secreteKey}`;
+            return axiosConfig;
+        }, (error) => {
+            return Promise.reject(error);
+        })
+    }
+
+
+    async paymentInitiation(paymentInitiation: IChapaPaymentInitiation): Promise<IChapaPaymentInitiationResponse> {
         try {
-            const tx_ref = `ERAP-${randomUUID().slice(0, 11)}`;
             if (!paymentInitiation.currency) paymentInitiation.currency = Currency.ETB
-            paymentInitiation.callback_url = `${config.baseUrl}/api/v1/payment/chapa/${tx_ref}`
-            paymentInitiation.return_url = `${config.clientUrl}/payment/success`
+            paymentInitiation.callback_url = `${config.baseUrl}/api/v1/payment/verify/${paymentInitiation.tx_ref}`
+            paymentInitiation.return_url = `${config.baseUrl}/api/v1/payment/verify/${paymentInitiation.tx_ref}`
             const dataToBeSent = {
                 ...paymentInitiation,
-                tx_ref,
             }
             Logger.debug(dataToBeSent)
-            const headers = {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.secretKey}`,
-            }
-            const response = await fetch(config.payment.chapa.chapaInitiatePaymentUrl, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(dataToBeSent),
+            const response: AxiosResponse = await axios.post(`${config.payment.chapa.chapaInitiatePaymentUrl}`, dataToBeSent, {
             })
-            const responseData = await response.json() as IChapaPaymentInitiationResponse
-            if (responseData.status !== 'success') throw new ApiError(httpStatus.BAD_REQUEST, responseData.message)
-            responseData.tx_ref = tx_ref;
+            if (response.status >= 200 && response.status < 300) {
+                const data = response.data
+                data.tx_ref = paymentInitiation.tx_ref;
+                return data as IChapaPaymentInitiationResponse
+            } else {
+                // console.log(`error occured while initiating payment: ${response.status} ${response.statusText} ${response.data.message} `)
+                throw new ApiError(httpStatus.BAD_REQUEST, `error occured while initiating payment: ${response.data.message} `)
+            }
 
-            return responseData;
         } catch (error) {
-            if (error instanceof ApiError) throw error;
-            throw new ApiError(httpStatus.BAD_REQUEST, `system Error: error occured while initiating payment`)
+            if (error instanceof AxiosError) {
+                // `unknown error occured while initiating payment: ${error.response?.status} ${error.response?.statusText} ${error.response?.data.message}`
+                Logger.debug({
+                    status: error.response?.status,
+                    statusText: error.response?.statusText,
+                    message: error.response?.data.message
+                })
+                throw new ApiError(httpStatus.BAD_REQUEST, `unknown error occured while initiating payment: ${error.response?.data.message}`)
+            } else {
+                throw new ApiError(httpStatus.BAD_REQUEST, `system Error: error occured while initiating payment`)
+            }
         }
 
     }
     async paymentVerification(tx_ref: string): Promise<IChapaPaymentVerificationResponseData> {
         try {
-            const headers = {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.secretKey}`,
+            const response: AxiosResponse = await axios.get(`${config.payment.chapa.chapaVerifyPaymentUrl}${tx_ref}`)
+            if (response.status >= 200 && response.status < 300) {
+                const data = response.data
+                return data as IChapaPaymentVerificationResponseData
+            } else {
+                throw new ApiError(httpStatus.BAD_REQUEST, `error occured while verifying payment: ${response.data.message} `)
             }
-            const response = await fetch(config.payment.chapa.chapaVerifyPaymentUrl + tx_ref, {
-                method: 'GET',
-                headers,
-            })
-            const responseData = await response.json() as IChapaPaymentVerificationResponse
 
-            if (responseData.status !== 'success' || !responseData.data) throw new ApiError(httpStatus.BAD_REQUEST, responseData.message)
-            return responseData.data;
         } catch (error) {
             if (error instanceof ApiError) throw error;
             throw new ApiError(httpStatus.BAD_REQUEST, `system Error: error occured while verifying payment`)
