@@ -67,6 +67,7 @@ export const submissionManagementPermissions = [
     `submission:create`,
     `submission:update`,
     `submission:delete`,
+    `submission:update:mark`
 ]
 export const sysSubmissionManagementPermissions = [
     ...submissionManagementPermissions,
