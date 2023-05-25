@@ -2,8 +2,8 @@ import httpStatus from "http-status";
 import { TenderDal } from "../dal/tender.dal";
 import { ApiError } from "../errors";
 import { ITenderDoc, NewTender, Tender, UpdateTender } from "../model/tender";
-import { IOptions } from "../utils";
-import { ApplicantQuery, IApplicantDoc } from "../model/applicants";
+import { IOptions, QueryResult } from "../utils";
+import { ApplicantQuery, } from "../model/applicants";
 import { ApplicantService } from "./applicant.service";
 
 
@@ -35,13 +35,13 @@ export class TenderService {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong')
         }
     }
-    async getTenderApplicants(tenderId: string): Promise<IApplicantDoc[]> {
+    async getTenderApplicants(tenderId: string): Promise<QueryResult> {
         const tender = await this.getTenderById(tenderId)
         const applicantQuery: ApplicantQuery = {
             tenderId: tender.id,
-            orgId: tender.orgId
+            orgId: tender.orgId.toString()
         }
-        const applicants = await this.applicantService.getApplicantForOneTender(applicantQuery)
+        const applicants = await this.applicantService.getAllApplicantForOneTender(applicantQuery, {})
         return applicants
     }
     async updateTender(tenderId: string, update: UpdateTender): Promise<ITenderDoc> {

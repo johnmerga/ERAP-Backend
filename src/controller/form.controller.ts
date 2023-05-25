@@ -16,7 +16,7 @@ export class FormController {
         res.status(httpStatus.CREATED).send(form)
     })
     getForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.getForm(req.params.formId)
+        const form = await this.formService.getForm(req.params.formId, req.user!)
         res.status(httpStatus.OK).send(form)
     })
     queryForms = catchAsync(async (req: Request, res: Response, next: NextFunction) => {

@@ -4,7 +4,7 @@ import { ORG_SECTOR_TYPE } from "../organization";
 import { QueryResult } from "../../utils";
 TenderStatus
 export interface ITender {
-    orgId: mongoose.Types.ObjectId,
+    orgId: string,
     title: string,
     description: string,
     type: TenderType,
@@ -24,6 +24,7 @@ export interface ITenderDoc extends ITender, Document {
 }
 
 export type NewTender = Omit<ITender, 'applicants' | 'createdAt' | 'updatedAt'>
+export type NewTenderInputValidator = Omit<NewTender, 'orgId'>
 export type UpdateTender = Partial<NewTender>
 
 export interface ITenderModel extends Model<ITenderDoc> {

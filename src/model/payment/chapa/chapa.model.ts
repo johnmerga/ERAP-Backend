@@ -3,16 +3,17 @@ export interface ICustomizations {
     description?: string;
     logo?: string;
 }
-export interface IUserPaymentInput {
+export interface IChapaParams {
     first_name: string;
     last_name: string;
     email: string;
     amount: number;
     currency?: Currency;
+    return_url: string;
+    tx_ref: string;
 }
-export interface IPaymentInitiation extends IUserPaymentInput {
+export interface IChapaPaymentInitiation extends IChapaParams {
     callback_url?: string;
-    return_url?: string;
     customizations?: ICustomizations;
 }
 
@@ -31,7 +32,7 @@ export enum Currency {
 }
 
 
-export interface IChapaPaymentVerificationResponseData extends IUserPaymentInput {
+export interface IChapaPaymentVerificationResponseData extends IChapaParams {
     charge: number;
     mode: string;
     method: string;
@@ -62,4 +63,4 @@ export interface IChapaPaymentVerificationResponse {
 
 
 
-export type NewChapaPayment = Omit<IUserPaymentInput, 'currency'>;
+export type NewChapaPayment = Omit<IChapaParams, 'currency'>;
