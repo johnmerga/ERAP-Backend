@@ -1,10 +1,10 @@
-import { Tender, ITenderDoc, NewTender, } from "../model/tender";
+import { Tender, ITenderDoc, NewTender, NewTenderInput, } from "../model/tender";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
 
 
 export class TenderDal {
-    async create(tender: NewTender): Promise<ITenderDoc> {
+    async create(tender: NewTenderInput): Promise<ITenderDoc> {
         try {
             return (await Tender.create(tender)).save()
         } catch (error) {

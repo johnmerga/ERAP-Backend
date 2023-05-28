@@ -52,8 +52,9 @@ const tenderSchema = new Schema<ITenderDoc, ITenderModel>({
         required: true,
     },
     applicants: {
-        type: [Schema.Types.ObjectId],
+        type: [String],
         ref: 'Applicant',
+        default: [],
     },
     createdAt: {
         type: Date,
