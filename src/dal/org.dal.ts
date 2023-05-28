@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { UpdateOrgBody, Organization, IOrganizationDoc, NewOrg, } from "../model/organization";
+import { UpdateOrgBody, Organization, IOrganizationDoc, NewOrgInput, } from "../model/organization";
 import { ApiError } from "../errors";
 import httpStatus from "http-status";
 import { Operation, updateSubDocuments } from "../utils";
@@ -7,7 +7,7 @@ import { ILicense } from "../model/license";
 import { IAddress } from "../model/address";
 
 export class OrgDal {
-    async create(org: NewOrg): Promise<IOrganizationDoc> {
+    async create(org: NewOrgInput): Promise<IOrganizationDoc> {
         try {
             const newOrg = await new Organization(org).save()
             if (!newOrg)

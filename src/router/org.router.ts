@@ -20,6 +20,10 @@ export class OrgRouter {
         this.router.route('/').get(validate(orgValidator.getOrgs), this.orgController.getOrgs);
         // get organization by id
         this.router.route('/:orgId').get(validate(orgValidator.getOrg), this.orgController.getOrg);
+        // update organization by id: only rating
+        this.router.route('/:orgId/updateRating').patch(validate(orgValidator.updateOrgRating), this.orgController.updateOrgRating);
+        // update organization by id: only status, this route is only for system admin
+        this.router.route('/:orgId/updateStatus').patch(validate(orgValidator.updateOrgStatus), this.orgController.updateOrgStatus);
         /**
          * ----------------------------------------------------------------------------------------------------
          * update organization by id: this end point is used to update organization profile except certificates

@@ -1,5 +1,5 @@
 import joi from 'joi';
-import { NewOrg, ORG_SECTOR_TYPE, ORG_STATUS, ORG_TYPE } from '../model/organization';
+import { NewOrgValidator, ORG_SECTOR_TYPE, ORG_STATUS, ORG_TYPE } from '../model/organization';
 import Joi from 'joi';
 import { capitalizeFirstLetter, objectId } from './custom';
 import { UpdateLicenseBody } from '../model/license';
@@ -34,14 +34,13 @@ const createCertBody: Record<keyof UpdateCertificateBody, any> = {
 
 
 // new org validator
-export const createOrgBody: Record<keyof NewOrg, any> = {
+export const createOrgBody: Record<keyof NewOrgValidator, any> = {
     name: joi.string().lowercase().custom(capitalizeFirstLetter).trim(),
     address: joi.object().keys(createAddressBody),
     type: joi.string().valid(...Object.values(ORG_TYPE)).insensitive().trim(),
     tinNo: joi.string().trim(),
     capital: joi.number().integer(),
     sector: joi.string().valid(...Object.values(ORG_SECTOR_TYPE)).insensitive().trim(),
-    status: joi.string().valid(...Object.values(ORG_STATUS)).insensitive().trim(),
     license: joi.object().keys(createLicenseBody),
     certificates: joi.array().items(joi.object().keys(createCertBody)),
 }
@@ -89,9 +88,31 @@ export const updateOrg = {
         orgId: Joi.required().custom(objectId),
     }),
     body: Joi.object()
-        .keys(otherOrgBody)
+        .keys({
+            ...otherOrgBody,
+            address
+        })
         .min(1),
 };
+
+// update organization status
+export const updateOrgStatus = {
+    params: Joi.object().keys({
+        orgId: Joi.required().custom(objectId),
+    }),
+    body: Joi.object().keys({
+        status: Joi.string().valid(...Object.values(ORG_STATUS)).insensitive().trim(),
+    }).required()
+}
+
+export const updateOrgRating = {
+    params: Joi.object().keys({
+        orgId: Joi.required().custom(objectId),
+    }),
+    body: Joi.object().keys({
+        rating: Joi.number().required().min(0).max(5),
+    }).required()
+}
 
 // add organization certificates
 export const addCertificates = {
