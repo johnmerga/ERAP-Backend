@@ -5,7 +5,7 @@ import { objectId } from "./custom";
 const mongoId = Joi.string().custom(objectId);
 
 const createPaymentBody: Record<keyof NewPaymentInputType, any> = {
-    formId: Joi.custom(objectId),
+    tenderId: Joi.custom(objectId),
     paymentType: Joi.string().valid(...Object.values(PaymentType)).insensitive().trim(),
     payerInfo: Joi.object().keys({
         first_name: Joi.string().trim(),

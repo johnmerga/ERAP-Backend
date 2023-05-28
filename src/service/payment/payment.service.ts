@@ -1,8 +1,8 @@
 import { randomUUID, } from "crypto";
-import { PaymentDal, FormDal } from "../../dal";
+import { PaymentDal, } from "../../dal";
 import { IPaymentInfo, IPaymentInfoDoc, NewPaymentInputType, NewPaymentInputTypeFormatter, PaymentParams, SuccessPaymentResponse } from "../../model/payment/payment.model";
 import { IChapaPaymentInitiation, PaymentInfo, PaymentStatus } from "../../model/payment";
-import { chapaService, TenderService, ApplicantService } from "../../service";
+import { chapaService, TenderService, ApplicantService, FormService } from "../../service";
 import { IUserDoc } from "../../model/user";
 import { ApiError } from "../../errors";
 import httpStatus from "http-status";
@@ -14,15 +14,15 @@ import { NewApplicant } from "../../model/applicants";
 export class PaymentService {
     private chapaService: chapaService;
     private paymentDal: PaymentDal;
-    private formDal: FormDal;
+    private formService: FormService;
     private tenderService: TenderService;
     private applicantService: ApplicantService;
     constructor() {
         this.chapaService = new chapaService();
         this.paymentDal = new PaymentDal();
-        this.formDal = new FormDal();
         this.tenderService = new TenderService();
         this.applicantService = new ApplicantService();
+        this.formService = new FormService();
     }
     // format the payment body
     async formatPaymentBody(paymentInfo: NewPaymentInputTypeFormatter): Promise<PaymentParams> {
@@ -47,8 +47,11 @@ export class PaymentService {
     async payWithChapa(inputData: NewPaymentInputType, user: IUserDoc): Promise<SuccessPaymentResponse> {
         try {
             if (!user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'User does not have an organization');
-            const form = await this.formDal.getForm(inputData.formId,);
-            const tender = await this.tenderService.getTenderById(form.tenderId.toString());
+            const tender = await this.tenderService.getTenderById(inputData.tenderId);
+            const queryFormByTenderId = await this.formService.queryForms({ tenderId: tender.id }, {})
+            if (queryFormByTenderId.totalResults === 0) {
+                throw new ApiError(httpStatus.BAD_REQUEST, `No form found for this tender: ${tender.id}`)
+            }
             const applicant = await this.applicantService.getByOrgIdAndTenderId(user.orgId.toString(), tender.id)
             if (applicant.results.length > 0) {
                 throw new ApiError(httpStatus.BAD_REQUEST, 'You have already applied for this tender')
@@ -56,7 +59,6 @@ export class PaymentService {
             const input = await this.formatPaymentBody({
                 ...inputData,
                 orgId: user.orgId.toString(),
-                tenderId: form.tenderId.toString(),
                 amount: tender.price
             });
             const inputForChapa: IChapaPaymentInitiation = {
