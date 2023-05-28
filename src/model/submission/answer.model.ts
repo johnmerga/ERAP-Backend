@@ -10,4 +10,4 @@ export interface IAnswerDoc extends IAnswer, Document {
 }
 export interface IAnswerModel extends Model<IAnswerDoc> { }
 export declare type NewAnswer = Omit<IAnswer, 'mark' | 'id'>;
-export type AnswerEvaluation = Omit<IAnswer, 'answer'>
+export type AnswerEvaluation = Omit<IAnswer, 'answer' | 'questionId'>

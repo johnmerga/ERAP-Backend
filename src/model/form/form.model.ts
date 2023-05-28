@@ -7,6 +7,7 @@ export interface IFormFields {
     type: FormQuestionType,
     options?: string[],
     description?: string,
+    value: number,
     required: boolean,
 
 }

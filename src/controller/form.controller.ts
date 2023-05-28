@@ -21,7 +21,7 @@ export class FormController {
     })
     queryForms = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const filter = pick(req.query, ['type', 'tenderId'])
-        const options = req.query
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate'])
         const result = await this.formService.queryForms(filter, options)
         res.status(httpStatus.OK).send(result)
     })

@@ -1,15 +1,16 @@
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
-import { ISubmission, ISubmissionDoc, Submission, UpdateSubmissionBody, } from "../model/submission";
+import { ISubmissionDoc, NewSubmissionInput, Submission, UpdateSubmissionBody, } from "../model/submission";
 import { Operation, updateSubDocuments } from "../utils/updateSubDocs";
 
 export class SubmissionDAL {
-    async create(submission: ISubmission): Promise<any> {
+    async create(submission: NewSubmissionInput): Promise<ISubmissionDoc> {
         try {
             const newSubmission = await new Submission(submission).save()
             if (!newSubmission) {
                 throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "form submission was unsuccessful")
             }
+            return newSubmission
         } catch (error) {
             if (error instanceof ApiError) throw error
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While crating Submission")
