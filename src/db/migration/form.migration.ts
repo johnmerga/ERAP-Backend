@@ -10,7 +10,7 @@ const main = async () => {
     const formService = new FormService()
     const forms: NewForm[] = []
     for (let i = 0; i < 15; i++) {
-        const form: NewForm = {
+        const form = {
             // generate mongo id
             tenderId: new mongoose.Types.ObjectId(),
             title: faker.company.name(),
@@ -30,7 +30,7 @@ const main = async () => {
             ]
 
         }
-        forms.push(form)
+        forms.push(form as NewForm)
     }
     try {
         forms.forEach(async form => {
