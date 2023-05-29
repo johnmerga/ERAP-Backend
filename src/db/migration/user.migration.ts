@@ -1,9 +1,8 @@
-import {  Role, USER_STATUS, IUser } from "../../model/user";
+import { Role, USER_STATUS, IUser, User } from "../../model/user";
 import { faker } from '@faker-js/faker';
 import * as db from "../connect"
 import { PermissionService } from "../../service/permission.service";
 import mongoose from "mongoose";
-import { UserService } from "../../service/user.service";
 
 
 
@@ -40,7 +39,7 @@ async function main() {
     }
     try {
         usersToInsert.forEach(async user => {
-            await new UserService().create(user)
+            await User.create(user as IUser)
         })
 
     } catch (error) {

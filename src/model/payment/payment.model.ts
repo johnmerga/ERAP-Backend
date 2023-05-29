@@ -12,7 +12,6 @@ export interface IPayer {
 export interface IPaymentInfo {
     tenderId: string;
     orgId: string;
-    formId: string;
     tx_ref: string;
     amount: number;
     payerInfo: IPayer;
@@ -20,7 +19,7 @@ export interface IPaymentInfo {
     paymentType: PaymentType;
     paymentStatus: PaymentStatus;
 }
-export type NewPaymentInputType = Omit<IPaymentInfo, | 'amount' | 'tenderId' | 'orgId' | 'tx_ref' | 'date' | 'paymentStatus'> & { return_url: string };
+export type NewPaymentInputType = Omit<IPaymentInfo, | 'amount' | 'orgId' | 'tx_ref' | 'date' | 'paymentStatus'> & { return_url: string };
 export type NewPaymentInputTypeFormatter = Omit<IPaymentInfo, | 'tx_ref' | 'date' | 'paymentStatus'> & { return_url: string };
 export type SuccessPaymentResponse = {
     paymentInfo: IPaymentInfo;

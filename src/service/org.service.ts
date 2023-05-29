@@ -1,10 +1,11 @@
-import { IOrganizationDoc, UpdateOrgBody, Organization, NewOrg } from "../model/organization";
+import { IOrganizationDoc, UpdateOrgBody, Organization, NewOrgValidator, ORG_STATUS, } from "../model/organization";
 import { OrgDal } from "../dal";
 import httpStatus from "http-status";
 import { ApiError } from "../errors";
 import mongoose from "mongoose";
 import { IOptions, Operation, QueryResult, checkIdsInSubDocs } from "../utils";
 import { UpdateCertificateBody } from "../model/certificate";
+import { IUserDoc } from "../model/user";
 
 export class OrgService {
     private orgDal: OrgDal;
@@ -48,16 +49,22 @@ export class OrgService {
     }
 
     /* register org */
-    public async create(orgBody: NewOrg): Promise<IOrganizationDoc> {
+    public async create(orgBody: NewOrgValidator, user: IUserDoc): Promise<IOrganizationDoc> {
         // check if name is taken
         if (await this.isNameTaken(orgBody.name)) {
             throw new ApiError(httpStatus.BAD_REQUEST, "Name is already taken");
         }
+
         // check if Tin Number is taken
         if (await this.isTinNumberTaken(orgBody.tinNo)) {
             throw new ApiError(httpStatus.BAD_REQUEST, "Tin Number is already taken");
         }
-        return await this.orgDal.create(orgBody);
+        const newOrg = {
+            ...orgBody,
+            owner: user.id,
+            status: ORG_STATUS.PENDING,
+        }
+        return await this.orgDal.create(newOrg);
     }
 
     /* update organization profile */
@@ -92,6 +99,29 @@ export class OrgService {
         } catch (error) {
             if (error instanceof ApiError) throw error
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While updating Organization Profile");
+        }
+    }
+    // update organization rating
+    public async updateOrgRating(orgId: string, updateRating: UpdateOrgBody, user: IUserDoc): Promise<IOrganizationDoc> {
+        try {
+            if (!updateRating.rating) throw new ApiError(httpStatus.BAD_REQUEST, 'rating should be provided')
+            if (!user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, `user with no organization can't rate organizations`)
+            if (user.orgId.toHexString() === orgId) throw new ApiError(httpStatus.BAD_REQUEST, `you can't rate your own organization`)
+            const org = await this.updateOrgProfile(orgId, updateRating)
+            return org
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While updating Organization Rating");
+        }
+    }
+    // update organization status
+    public async updateOrgStatus(orgId: string, status: ORG_STATUS): Promise<IOrganizationDoc> {
+        try {
+            const org = await this.updateOrgProfile(orgId, { status })
+            return org
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While updating Organization Status");
         }
     }
     /* delete org */

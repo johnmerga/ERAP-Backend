@@ -13,6 +13,7 @@ const formQuestionBody: Record<keyof IFormFields, any> = {
         then: joi.array().items(joi.string().required().trim()).required(),
         otherwise: joi.array().items(joi.string()).optional(),
     }),
+    value: joi.number().integer().default(10),
     required: joi.boolean(),
 }
 // form validation

@@ -1,5 +1,5 @@
 import { SubmissionDAL } from "../dal";
-import { AnswerEvaluation, IAnswer, IAnswerDoc, ISubmission } from "../model/submission"
+import { AnswerEvaluation, IAnswer, IAnswerDoc, ISubmission, NewSubmissionValidator } from "../model/submission"
 import { ApiError } from "../errors";
 import httpStatus from "http-status";
 import { ISubmissionDoc, Submission, UpdateSubmissionBody } from "../model/submission";
@@ -8,12 +8,16 @@ import { Tender } from "../model/tender";
 import { Organization } from "../model/organization";
 import { IFormDoc, IFormFieldsDoc, Form } from "../model/form";
 import { checkIdsInSubDocs } from "../utils/";
+import { TenderService } from "./tender.service";
+import { IUserDoc } from "../model/user";
 // import { Logger } from "../logger";
 
 export class SubmissionService {
-    private submissionDAL: SubmissionDAL
+    private submissionDAL: SubmissionDAL;
+    private tenderService: TenderService;
     constructor() {
-        this.submissionDAL = new SubmissionDAL()
+        this.submissionDAL = new SubmissionDAL();
+        this.tenderService = new TenderService();
     }
     //checker function for if the bidId,formId, orgId are valid
     async checkBidFormOrg({ tenderId, formId, orgId }: Partial<Record<'orgId' | 'formId' | 'tenderId', string>>): Promise<boolean> {
@@ -43,19 +47,24 @@ export class SubmissionService {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While checking Bid, Form, Org");
         }
     }
-    async create(submission: ISubmission): Promise<ISubmissionDoc> {
+    async create(submission: NewSubmissionValidator, user: IUserDoc): Promise<ISubmissionDoc> {
         try {
+            const tenderOrgId = (await this.tenderService.getTenderById(submission.tenderId)).orgId
+            if (!tenderOrgId || tenderOrgId === user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, "You can't bid on your own tender or ")
             await this.checkBidFormOrg({
                 formId: submission.formId,
-                orgId: submission.orgId,
+                orgId: user.orgId.toString(),
                 tenderId: submission.tenderId
             })
             if (submission.answers.length === 0) throw new ApiError(httpStatus.BAD_REQUEST, "Answers are required")
             // const isValidQuestionIds = await this.checkQuestionIds(submission.answers.map((answer) => answer.questionId))
             const submissionAnswers = submission.answers.map((answer) => answer.questionId)
             const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionAnswers)
-            if (!isValidQuestionIds) throw new ApiError(httpStatus.BAD_REQUEST, "Invalid Question Ids")
-            return await this.submissionDAL.create(submission)
+            if (!isValidQuestionIds || isValidQuestionIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, "Invalid Question Ids")
+            return await this.submissionDAL.create({
+                ...submission,
+                orgId: user.orgId.toString()
+            })
         } catch (error) {
             if (error instanceof ApiError) throw error
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While creating Submission")
@@ -99,8 +108,73 @@ export class SubmissionService {
     // evaluation mark for answers
     async giveMark(submissionId: string, marks: AnswerEvaluation[]): Promise<ISubmissionDoc> {
         try {
-            const submission = await Submission.findById(submissionId)
-            if (!submission) throw new ApiError(httpStatus.NOT_FOUND, 'unable to give mark: submission not found')
+            const submission = await this.submissionDAL.findSubmission(submissionId)
+
+            const submissionWithForm = (await submission.populate('formId'))
+            const form = submissionWithForm.formId as unknown as IFormDoc
+            const totalValues = (await Form.aggregate([
+                { $match: { _id: form._id } },
+                {
+                    $project: {
+                        totalValue: {
+                            $sum: "$fields.value"
+                        }
+                    }
+                }
+            ]))[0].totalValue
+            if (!(typeof totalValues === 'number') || totalValues < 1) throw new ApiError(httpStatus.BAD_REQUEST, "unable to give mark: total values are empty or less than 1")
+            //@ts-ignore
+            const formQuestions = form.fields as IFormFieldsDoc[];
+
+            // check if the formQuestions are not empty or undefined
+            if (!formQuestions || formQuestions.length === 0) throw new ApiError(httpStatus.BAD_REQUEST, "unable to give mark: form questions are empty")
+            // destructuring the formQuestions to get the id and value
+            const fieldIdAndValue = formQuestions.map((question) => ({
+                id: question._id.toString(),
+                value: question.value
+            }))
+            // destructuring the submission answers to get the id and questionId
+            const submissionQuestionId = submission.answers.map((answer) => {
+                return {
+                    subAnsId: answer.id,
+                    questionId: answer.questionId.toString()
+                }
+            })
+            // filter the submissionQuestionId to get the matching questionId
+            const filteredSubmissionQuestionId = submissionQuestionId.filter((subAns) =>
+                fieldIdAndValue.some((field) => field.id === subAns.questionId)
+            );
+            // map the filteredSubmissionQuestionId to get the subAnsId, formFieldId, formFieldValue
+            const fieldIdAndValueMatchingSubmission = fieldIdAndValue.map((field) => {
+                const matchingSubmission = filteredSubmissionQuestionId.find(
+                    (subAns) => subAns.questionId === field.id
+                );
+
+                if (matchingSubmission) {
+                    return {
+                        subAnsId: matchingSubmission.subAnsId,
+                        formFieldId: field.id,
+                        formFieldValue: field.value,
+                    };
+                }
+                return undefined;
+            }).filter((field) => field !== undefined);
+
+            if (!fieldIdAndValueMatchingSubmission || fieldIdAndValueMatchingSubmission.length === 0) {
+                throw new ApiError(
+                    httpStatus.BAD_REQUEST,
+                    "Unable to give mark: no matching question found"
+                );
+            }
+            if (fieldIdAndValueMatchingSubmission.length === 0) throw new ApiError(httpStatus.BAD_REQUEST, "unable to give mark: no matching question found")
+            marks.forEach((mark) => {
+                fieldIdAndValueMatchingSubmission.forEach((field) => {
+                    if (!field) throw new ApiError(httpStatus.BAD_REQUEST, "unable to give mark: no matching question found")
+                    // if (field.id === mark.id && mark.mark > field.value) throw new ApiError(httpStatus.BAD_REQUEST, `unable to give mark: mark is greater than the value of the question with id: ${field.id}`)
+                    if (field.subAnsId === mark.id && mark.mark > field.formFieldValue) throw new ApiError(httpStatus.BAD_REQUEST, `unable to give mark: mark is greater than the value of the question with id: ${field.formFieldId}`)
+                })
+            })
+
             for (const answer of marks) {
                 // destructuring a single answer
                 const { mark, id } = answer
@@ -110,17 +184,19 @@ export class SubmissionService {
                 }
                 submission.answers[answerIndex].mark = mark
                 let totalMark = 0;
+
                 submission.answers.forEach((answer) => {
                     totalMark += answer.mark
-                })
-                // convert to percentage
 
-                submission.score = (totalMark / (submission.answers.length * 10)) * 100
+
+                })
+                // convert to percentage and convert to 2 decimal places
+                submission.score = Number(((totalMark / totalValues) * 100).toFixed(2))
 
             }
             submission.updatedAt = new Date()
             await submission.save()
-            return submission
+            return await this.submissionDAL.findSubmission(submissionId)
         } catch (error) {
             if (error instanceof ApiError) throw error
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error occured while giving a mark for Submissions ')

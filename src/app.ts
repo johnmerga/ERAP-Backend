@@ -21,7 +21,7 @@ const path = [
     '/api/v1/auth/refresh-token',
     '/api/v1/auth/logout',
     '/api/v1/test',
-        { url: /^\/api\/v1\/payment\/verify\/.*/, methods: ['GET'] },
+    { url: /^\/api\/v1\/payment\/verify\/.*/, methods: ['GET'] },
     { url: '/api/v1/orgs', methods: ['GET'] },
     { url: '/api/v1/tenders', methods: ['GET'] },
 ]

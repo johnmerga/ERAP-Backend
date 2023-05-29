@@ -12,7 +12,7 @@ export class OrgController {
     }
 
     public createOrg = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const org = await this.orgService.create(req.body);
+        const org = await this.orgService.create(req.body, req.user!);
         res.status(httpStatus.CREATED).send(org);
     });
 
@@ -41,6 +41,19 @@ export class OrgController {
             res.send(org);
         }
     });
+    // update organization status
+    public updateOrgStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (typeof req.params.orgId === 'string') {
+            const org = await this.orgService.updateOrgStatus(req.params.orgId, req.body.status);
+            res.send(org);
+        }
+    })
+    public updateOrgRating = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (typeof req.params.orgId === 'string') {
+            const org = await this.orgService.updateOrgRating(req.params.orgId, req.body, req.user!);
+            res.send(org);
+        }
+    })
     public deleteOrg = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         if (typeof req.params.orgId === 'string') {
             await this.orgService.deleteOrg(req.params.orgId);

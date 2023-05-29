@@ -24,9 +24,10 @@ export class TenderController {
         res.status(httpStatus.OK).send(tender)
     })
     getTenders = catchAsync(async (req: Request, res: Response) => {
-        const filter = pick(req.query, ['orgId', 'status', 'type', 'sector'])
-        const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy'])
-        const tenders = await this.tenderService.queryTenders(filter, options)
+        const filter = pick(req.query, ['orgId', 'status', 'type', 'sector',])
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy', 'search'])
+        const compare = req.body
+        const tenders = await this.tenderService.queryTenders(filter, options, compare)
         res.status(httpStatus.OK).send(tenders)
     })
     getTenderApplicants = catchAsync(async (req: Request, res: Response) => {

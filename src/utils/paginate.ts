@@ -14,6 +14,11 @@ export interface IOptions {
     populate?: string;
     limit?: number;
     page?: number;
+    search?: string;
+    compare?: Record<string, any>;
+}
+export interface ICompare {
+    [key: string]: [string, string | undefined]
 }
 
 const paginate = <T extends Document>(schema: Schema) => {
@@ -61,11 +66,64 @@ const paginate = <T extends Document>(schema: Schema) => {
             project = '-createdAt -updatedAt';
         }
 
+        let search: Record<string, any> = {};
+        if (options.search) {
+            const searchCriteria: Record<string, any> = {}
+            // only split on the first line using ':'
+            const [targetField, searchInput] = options.search.split(':')
+            searchCriteria[targetField] = searchInput
+            search = searchCriteria
+
+        }
+
         const limit = options.limit && parseInt(options.limit.toString(), 10) > 0 ? parseInt(options.limit.toString(), 10) : 10;
         const page = options.page && parseInt(options.page.toString(), 10) > 0 ? parseInt(options.page.toString(), 10) : 1;
         const skip = (page - 1) * limit;
 
         const countPromise = this.countDocuments(filter).exec();
+        // for searching
+        if (search && (Object.keys(search).length > 0)) {
+            const searchField = Object.keys(search).toString();
+            // const searchRegex = new RegExp((Object.keys(search).toString()), 'i');
+            const searchWords = Object.values(search).toString()
+            filter = {
+                $and: [
+                    filter,
+                    {
+                        $or: [
+                            { [searchField]: { $regex: '^' + `${searchWords}`, $options: 'i' }, }
+                        ]
+                    }
+                ]
+            }
+
+
+        }
+
+
+        // for comparing
+        if (options.compare && (Object.keys(options.compare).length > 0)) {
+            // const compareField = Object.keys(options.compare).toString();
+            // const compareMetric = Object.values(options.compare).toString()
+            // const [start, end] = compareMetric.split(',')
+            const condition = Object.entries(options.compare).map(([key, value]) => ({ [key]: { $gte: value[0], $lte: value[1] } }))
+            filter = {
+                $and: [
+                    filter,
+                    {
+                        $and: condition
+
+                    }
+                ]
+            }
+        }
+
+
+
+
+
+
+
         let docsPromise = this.find(filter).sort(sort).skip(skip).limit(limit).select(project);
 
         if (options.populate) {

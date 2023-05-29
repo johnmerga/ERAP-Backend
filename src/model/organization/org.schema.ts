@@ -4,11 +4,16 @@ import { toJSON, paginate } from '../../utils'
 import { AddressSchema } from '../address';
 import { CertificateSchema } from '../certificate';
 import { LicenseSchema } from '../license';
-import {ORG_TYPE,ORG_SECTOR_TYPE,} from './org.type'
-import {ORG_STATUS} from './org.status'
+import { ORG_TYPE, ORG_SECTOR_TYPE, } from './org.type'
+import { ORG_STATUS } from './org.status'
 
 
 const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
+    owner: {
+        type: String,
+        required: true,
+        ref: "User",
+    },
     name: {
         type: String,
         required: true,
@@ -41,7 +46,8 @@ const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
     certificates: [CertificateSchema],
     address: AddressSchema,
     rating: {
-        type: Number
+        type: Number,
+        default: null,
     },
     createdAt: {
         type: Date,

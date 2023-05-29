@@ -16,11 +16,6 @@ const paymentInfoSchema = new Schema<IPaymentInfo, IPaymentInfoModel>({
         required: true,
         ref: "Tender",
     },
-    formId: {
-        type: String,
-        required: true,
-        ref: "Form",
-    },
     tx_ref: {
         type: String,
         required: true,

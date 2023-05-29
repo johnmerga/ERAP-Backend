@@ -20,6 +20,11 @@ const formFieldSchema = new Schema<IFormFieldsDoc, IFormFieldsModel>({
     options: [{
         type: String,
     }],
+    value: {
+        type: Number,
+        required: true,
+        default: 10,
+    },
     required: {
         type: Boolean,
         required: true,

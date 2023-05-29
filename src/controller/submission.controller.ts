@@ -9,7 +9,7 @@ export class SubmissionController {
         this.submissionService = new SubmissionService()
     }
     createSubmission = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.create(req.body)
+        const submission = await this.submissionService.create(req.body,req.user!)
         res.status(httpStatus.CREATED).send(submission)
     }
     )

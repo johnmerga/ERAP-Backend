@@ -1,5 +1,5 @@
 import { Model, Document, Schema } from "mongoose"
-import { IAnswer } from "./answer.model";
+import { IAnswer, NewAnswer } from "./answer.model";
 
 export interface ISubmission {
     tenderId: string;
@@ -18,5 +18,12 @@ export interface ISubmissionModel extends Model<ISubmissionDoc> {
 }
 
 
-export type NewSubmission = Omit<ISubmission, 'createdAt' | 'updatedAt' | 'score'>
+export type NewSubmissionValidator = {
+    tenderId: string;
+    formId: string;
+    answers: NewAnswer[];
+}
+export type NewSubmissionInput = NewSubmissionValidator & {
+    orgId: string;
+}
 export type UpdateSubmissionBody = Partial<ISubmission>
