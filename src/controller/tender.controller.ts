@@ -12,11 +12,11 @@ export class TenderController {
         this.applicantService = new ApplicantService()
     }
     createTender = catchAsync(async (req: Request, res: Response) => {
-        if (!req.user?.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'user with no organization cannot create tender')
+        if (!req.user || !req.user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'user with no organization cannot create tender')
         const tender = await this.tenderService.create({
             ...req.body,
             orgId: req.user?.orgId
-        })
+        }, req.user)
         res.status(httpStatus.CREATED).send(tender)
     })
     getTenderById = catchAsync(async (req: Request, res: Response) => {

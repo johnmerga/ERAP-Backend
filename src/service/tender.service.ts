@@ -6,17 +6,24 @@ import { IOptions, QueryResult } from "../utils";
 import { ApplicantQuery, } from "../model/applicants";
 import { ApplicantService } from "./applicant.service";
 import moment from "moment";
+import { IUserDoc } from "../model/user";
+import { OrgService } from "./org.service";
+import { ORG_STATUS } from "../model/organization";
 
 
 export class TenderService {
     private tenderDal: TenderDal;
     private applicantService: ApplicantService;
+    private orgService: OrgService
     constructor() {
         this.tenderDal = new TenderDal()
         this.applicantService = new ApplicantService()
+        this.orgService = new OrgService()
     }
 
-    async create(tenderBody: NewTender): Promise<ITenderDoc> {
+    async create(tenderBody: NewTender, user: IUserDoc): Promise<ITenderDoc> {
+        const org = await this.orgService.findOrgById(user.orgId.toString())
+        if (org.status !== ORG_STATUS.VERIFIED) throw new ApiError(httpStatus.BAD_REQUEST, 'Your organization is not verified, please contact the admin')
         return await this.tenderDal.create({
             ...tenderBody,
             applicants: [],

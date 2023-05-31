@@ -11,9 +11,10 @@ const tenderBody: Record<keyof NewTenderInputValidator, any> = {
     sector: joi.string().valid(...Object.values(ORG_SECTOR_TYPE)).insensitive().trim(),
     qualifications: joi.array().items(joi.string().trim()).optional(),
     status: joi.string().valid(...Object.values(TenderStatus)).insensitive().trim(),
-    openDate: joi.date(),
-    closeDate: joi.date(),
-    bidDeadline: joi.date(),
+    // check if the date is not before today
+    openDate: joi.date().label('Date format: YYYY-MM-DD').min('now'),
+    closeDate: joi.date().label('Date format: YYYY-MM-DD').min('now'),
+    bidDeadline: joi.date().min('now').label('Date format: YYYY-MM-DD'),
 };
 // get tender by comparing 
 const createTenderCompareBody: Record<keyof ITenderQuery, any> = {
