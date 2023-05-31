@@ -14,8 +14,17 @@ export class FormService {
         this.tenderService = new TenderService()
         this.applicantService = new ApplicantService()
     }
-    async createForm(form: NewForm): Promise<IFormDoc> {
-        await this.tenderService.getTenderById((form.tenderId).toString())
+    async createForm(form: NewForm, user: IUserDoc): Promise<IFormDoc> {
+        const tendersOrgId = (await this.tenderService.getTenderById((form.tenderId).toString())).orgId
+        // checking if the user is allowed to create a form for this tender
+        if (tendersOrgId !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, `you are not allowed to create a form for this tender`)
+        const forms = await Form.paginate({
+            tenderId: form.tenderId,
+            type: form.type
+        }, {})
+        if (forms.totalResults > 0) {
+            throw new ApiError(httpStatus.BAD_REQUEST, `A form with type: [${form.type}] already exist for this tender: [${form.tenderId}]`)
+        }
         return await this.formDal.create(form)
     }
     async getForm(formId: string, user: IUserDoc): Promise<IFormDoc> {
