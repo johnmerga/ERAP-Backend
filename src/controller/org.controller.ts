@@ -12,6 +12,7 @@ export class OrgController {
     }
 
     public createOrg = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.user) throw new ApiError(httpStatus.UNAUTHORIZED, 'you can not create organization without registering as user first')
         const org = await this.orgService.create(req.body, req.user!);
         res.status(httpStatus.CREATED).send(org);
     });

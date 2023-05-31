@@ -1,8 +1,8 @@
 import joi from "joi";
 import { capitalizeFirstLetter, password } from "./custom";
-import { NewAdmin } from "../model/user";
+import { NewAdminValidator } from "../model/user/user.model";
 
-export const registerBody: Record<keyof NewAdmin, any> = {
+export const registerBody: Record<keyof NewAdminValidator, any> = {
     name: joi.string().required().custom(capitalizeFirstLetter).trim(),
     email: joi.string().email().required().trim(),
     password: joi.string().required().trim(),

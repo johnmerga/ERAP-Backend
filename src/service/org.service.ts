@@ -6,11 +6,14 @@ import mongoose from "mongoose";
 import { IOptions, Operation, QueryResult, checkIdsInSubDocs } from "../utils";
 import { UpdateCertificateBody } from "../model/certificate";
 import { IUserDoc } from "../model/user";
+import { UserService } from "./user.service";
 
 export class OrgService {
     private orgDal: OrgDal;
+    private userService: UserService
     constructor() {
         this.orgDal = new OrgDal();
+        this.userService = new UserService()
     }
 
     /* check name */
@@ -64,7 +67,9 @@ export class OrgService {
             owner: user.id,
             status: ORG_STATUS.PENDING,
         }
-        return await this.orgDal.create(newOrg);
+        const org = await this.orgDal.create(newOrg);
+        await this.userService.updateUserStatus(user.id, { orgId: org.id })
+        return org
     }
 
     /* update organization profile */
