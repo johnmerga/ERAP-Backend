@@ -1,6 +1,6 @@
 
 export enum Role {
-    SysAdmin = 'sysadmin',
+    SysAdmin = 'sysAdmin',
     Admin = 'admin',
     Procurement = 'procurement',
     Evaluator = 'evaluator',

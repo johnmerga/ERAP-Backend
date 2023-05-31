@@ -8,7 +8,7 @@ import { NewUser, IUserDoc } from "../model/user";
 
 export class UserDal {
 
-    async create(user: NewUser | NewAdmin): Promise<HydratedDocument<IUserDoc>> {
+    async createAdmin(user: NewAdmin): Promise<HydratedDocument<IUserDoc>> {
 
         const newUser = new User(user).save()
             .then(function (user) {
@@ -23,6 +23,22 @@ export class UserDal {
 
 
         return (await newUser).save();
+    }
+    async createUser(user: NewUser): Promise<HydratedDocument<IUserDoc>> {
+
+        const newAdmin = new User(user).save()
+            .then(function (user) {
+                return user
+            })
+            .catch(function (err) {
+                // handle error
+                throw new ApiError(httpStatus.BAD_REQUEST, "Error Happened While crating User");
+
+            })
+
+
+
+        return (await newAdmin).save();
     }
 
     async findUser(query: Record<string, unknown>): Promise<IUserDoc> {
