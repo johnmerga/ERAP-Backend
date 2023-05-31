@@ -9,6 +9,7 @@ import httpStatus from "http-status";
 import { Logger } from "../../logger";
 import { IOptions, QueryResult } from "../../utils";
 import { NewApplicant } from "../../model/applicants";
+import { TenderStatus } from "../../model/tender";
 
 
 export class PaymentService {
@@ -48,6 +49,7 @@ export class PaymentService {
         try {
             if (!user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'User does not have an organization');
             const tender = await this.tenderService.getTenderById(inputData.tenderId);
+            if (tender.status !== TenderStatus.PUBLISHED) throw new ApiError(httpStatus.BAD_REQUEST, 'Tender is not published yet');
             const queryFormByTenderId = await this.formService.queryForms({ tenderId: tender.id }, {})
             if (queryFormByTenderId.totalResults === 0) {
                 throw new ApiError(httpStatus.BAD_REQUEST, `No form found for this tender: ${tender.id}`)
