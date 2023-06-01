@@ -30,6 +30,22 @@ export class TenderController {
         const tenders = await this.tenderService.queryTenders(filter, options, compare)
         res.status(httpStatus.OK).send(tenders)
     })
+    // get published tenders
+    getPublishedTenders = catchAsync(async (req: Request, res: Response) => {
+        const filter = pick(req.query, ['sector',])
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy', 'search'])
+        const compare = req.body
+        const tenders = await this.tenderService.queryPublishedTenders(req.user!, filter, options, compare,)
+        res.status(httpStatus.OK).send(tenders)
+    })
+    // get only my tenders
+    getMyTenders = catchAsync(async (req: Request, res: Response) => {
+        const filter = pick(req.query, ['orgId', 'status', 'type', 'sector',])
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy', 'search'])
+        const compare = req.body
+        const tenders = await this.tenderService.queryMyTenders(req.user!, filter, options, compare,)
+        res.status(httpStatus.OK).send(tenders)
+    })
     getTenderApplicants = catchAsync(async (req: Request, res: Response) => {
         const filter = pick(req.query, ['orgId', 'isApplicationSubmitted'])
         const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate'])
@@ -43,11 +59,11 @@ export class TenderController {
         res.status(httpStatus.OK).send(applicants)
     })
     updateTender = catchAsync(async (req: Request, res: Response) => {
-        const tender = await this.tenderService.updateTender(req.params.tenderId, req.body)
+        const tender = await this.tenderService.updateTender(req.params.tenderId, req.body, req.user!)
         res.status(httpStatus.OK).send(tender)
     })
     deleteTender = catchAsync(async (req: Request, res: Response) => {
-        await this.tenderService.deleteTender(req.params.tenderId)
+        await this.tenderService.deleteTender(req.params.tenderId, req.user!)
         res.status(httpStatus.OK).send()
     })
 }

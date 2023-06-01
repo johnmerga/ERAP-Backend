@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import { TenderDal } from "../dal/tender.dal";
 import { ApiError } from "../errors";
-import { ITenderDoc, ITenderQuery, NewTender, Tender, UpdateTender } from "../model/tender";
+import { ITenderDoc, ITenderQuery, NewTender, Tender, TenderStatus, UpdateTender } from "../model/tender";
 import { IOptions, QueryResult } from "../utils";
 import { ApplicantQuery, } from "../model/applicants";
 import { ApplicantService } from "./applicant.service";
@@ -32,7 +32,7 @@ export class TenderService {
     async getTenderById(tenderId: string): Promise<ITenderDoc> {
         return await this.tenderDal.getTender(tenderId)
     }
-    async queryTenders(filter: Record<string, any>, options: IOptions, compare?: ITenderQuery): Promise<Record<string, any>> {
+    async queryTenders(filter: Record<string, any>, options: IOptions, compare?: ITenderQuery): Promise<QueryResult> {
         try {
             if (compare) {
                 let comparators = {}
@@ -85,6 +85,121 @@ export class TenderService {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong')
         }
     }
+    async queryPublishedTenders(user: IUserDoc, filter: Record<string, any>, options: IOptions, compare?: ITenderQuery,): Promise<QueryResult> {
+        try {
+            if (compare) {
+                let comparators = {}
+                if (compare.openDate) {
+                    compare.openDate[0] ? moment(compare.openDate[0]).toDate() : undefined
+                    compare.openDate[1] ? moment(compare.openDate[1]).toDate() : undefined
+                    comparators = {
+                        ...comparators,
+                        openDate: [compare.openDate[0], compare.openDate[1]]
+                    }
+                }
+                if (compare.bidDeadline) {
+                    compare.bidDeadline[0] ? moment(compare.bidDeadline[0]).toDate() : undefined
+                    compare.bidDeadline[1] ? moment(compare.bidDeadline[1]).toDate() : undefined
+                    comparators = {
+                        ...comparators,
+                        bidDeadline: [compare.bidDeadline[0], compare.bidDeadline[1]]
+                    }
+                }
+                if (compare.closeDate) {
+                    compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : undefined
+                    compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : undefined
+                    comparators = {
+                        ...comparators,
+                        closeDate: [compare.closeDate[0], compare.closeDate[1]]
+                    }
+                }
+                if (compare.price) {
+                    compare.price[0] ? compare.price[0] : undefined
+                    compare.price[1] ? compare.price[1] : undefined
+                    comparators = {
+                        ...comparators,
+                        price: [compare.price[0], compare.price[1]]
+                    }
+                }
+                options = {
+                    ...options,
+                    compare: comparators
+                }
+            }
+            const tenders = await Tender.paginate({
+                ...filter,
+                orgId: { $ne: user.orgId },
+                status: 'PUBLISHED'
+            }, options)
+            if (!tenders) {
+                throw new ApiError(httpStatus.NOT_FOUND, 'Tenders not found')
+            }
+            return tenders
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error
+            }
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong')
+        }
+    }
+
+    // get only my tenders
+    async queryMyTenders(user: IUserDoc, filter: Record<string, any>, options: IOptions, compare?: ITenderQuery,): Promise<QueryResult> {
+        try {
+            if (compare) {
+                let comparators = {}
+                if (compare.openDate) {
+                    compare.openDate[0] ? moment(compare.openDate[0]).toDate() : undefined
+                    compare.openDate[1] ? moment(compare.openDate[1]).toDate() : undefined
+                    comparators = {
+                        ...comparators,
+                        openDate: [compare.openDate[0], compare.openDate[1]]
+                    }
+                }
+                if (compare.bidDeadline) {
+                    compare.bidDeadline[0] ? moment(compare.bidDeadline[0]).toDate() : undefined
+                    compare.bidDeadline[1] ? moment(compare.bidDeadline[1]).toDate() : undefined
+                    comparators = {
+                        ...comparators,
+                        bidDeadline: [compare.bidDeadline[0], compare.bidDeadline[1]]
+                    }
+                }
+                if (compare.closeDate) {
+                    compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : undefined
+                    compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : undefined
+                    comparators = {
+                        ...comparators,
+                        closeDate: [compare.closeDate[0], compare.closeDate[1]]
+                    }
+                }
+                if (compare.price) {
+                    compare.price[0] ? compare.price[0] : undefined
+                    compare.price[1] ? compare.price[1] : undefined
+                    comparators = {
+                        ...comparators,
+                        price: [compare.price[0], compare.price[1]]
+                    }
+                }
+                options = {
+                    ...options,
+                    compare: comparators
+                }
+            }
+            const tenders = await Tender.paginate({
+                ...filter,
+                orgId: user.orgId
+            }, options)
+            if (!tenders) {
+                throw new ApiError(httpStatus.NOT_FOUND, 'Tenders not found')
+            }
+            return tenders
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error
+            }
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong')
+        }
+    }
     async getTenderApplicants(tenderId: string): Promise<QueryResult> {
         const tender = await this.getTenderById(tenderId)
         const applicantQuery: ApplicantQuery = {
@@ -94,10 +209,17 @@ export class TenderService {
         const applicants = await this.applicantService.getAllApplicantForOneTender(applicantQuery, {})
         return applicants
     }
-    async updateTender(tenderId: string, update: UpdateTender): Promise<ITenderDoc> {
+    async updateTender(tenderId: string, update: UpdateTender, user: IUserDoc): Promise<ITenderDoc> {
+        const tender = await this.getTenderById(tenderId)
+        if (tender.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, 'You can not update a tender that is not yours')
+        if (update.status && update.status !== TenderStatus.PUBLISHED) {
+            if (tender.status === TenderStatus.PUBLISHED) throw new ApiError(httpStatus.BAD_REQUEST, 'You can not change the status of a published tender')
+        }
         return await this.tenderDal.updateTender(tenderId, update)
     }
-    async deleteTender(tenderId: string): Promise<ITenderDoc> {
+    async deleteTender(tenderId: string, user: IUserDoc): Promise<ITenderDoc> {
+        const tender = await this.getTenderById(tenderId)
+        if (tender.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, 'You can not delete a tender that is not yours')
         return await this.tenderDal.deleteTender(tenderId)
     }
 }

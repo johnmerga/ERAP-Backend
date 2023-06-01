@@ -53,6 +53,23 @@ export const getTenders = {
     }),
     body: joi.object().keys(createTenderCompareBody).options({ abortEarly: false }),
 }
+export const getPublishedTenders = {
+    query: joi.object().keys({
+        search: joi.string().trim(),
+        // orgId: joi.string().custom(objectId),
+        // status: tenderBody.status,
+        // type: tenderBody.type,
+        sector: tenderBody.sector,
+        openDate: joi.date().description('Date format: YYYY-MM-DD'),
+        closeDate: joi.date().description('Date format: YYYY-MM-DD'),
+        bidDeadline: joi.date().description('Date format: YYYY-MM-DD'),
+        page: joi.number().min(1),
+        limit: joi.number().min(1),
+        sortBy: joi.string(),
+        projectBy: joi.string(),
+    }),
+    body: joi.object().keys(createTenderCompareBody).options({ abortEarly: false }),
+}
 
 
 export const getTenderApplicants = {
