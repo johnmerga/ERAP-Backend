@@ -103,9 +103,6 @@ const paginate = <T extends Document>(schema: Schema) => {
 
         // for comparing
         if (options.compare && (Object.keys(options.compare).length > 0)) {
-            // const compareField = Object.keys(options.compare).toString();
-            // const compareMetric = Object.values(options.compare).toString()
-            // const [start, end] = compareMetric.split(',')
             const condition = Object.entries(options.compare).map(([key, value]) => ({ [key]: { $gte: value[0], $lte: value[1] } }))
             filter = {
                 $and: [

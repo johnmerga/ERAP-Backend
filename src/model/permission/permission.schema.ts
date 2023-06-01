@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 import { IPermissionDoc, IPermissionModel } from "./permission.model"
-import { toJSON } from "../../utils";
+import { paginate, toJSON } from "../../utils";
 
 
 const PermissionSchema = new Schema<IPermissionDoc, IPermissionModel>({
@@ -26,6 +26,7 @@ PermissionSchema.statics.isNameTaken = async function (name: string) {
 }
 
 PermissionSchema.plugin(toJSON)
+PermissionSchema.plugin(paginate)
 
 
 export const Permission = model<IPermissionDoc, IPermissionModel>("Permission", PermissionSchema);

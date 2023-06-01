@@ -18,115 +18,132 @@ import { except, only } from "../../utils";
     User = 'user', 
  */
 
+export const chatManagementPermissions = [
+    { name: 'chat:read', description: 'Allows the user to read all chats in the organization.' },
+    { name: 'chat:create', description: 'Allows the user to create a new chat.' },
+    { name: 'chat:update', description: 'Allows the user to update a chat.' },
+    { name: 'chat:delete', description: 'Allows the user to delete a chat.' },
+];
+
+export const sysChatManagementPermissions = [
+    ...chatManagementPermissions,
+    { name: 'chat:read:all', description: 'Allows the user to read all chats across the system.' },
+    { name: 'chat:create:all', description: 'Allows the user to create new chats across the system.' },
+    { name: 'chat:update:all', description: 'Allows the user to update any chat in the system.' },
+    { name: 'chat:delete:all', description: 'Allows the user to delete any chat in the system.' },
+];
 
 export const orgManagementPermissions = [
-    // org management
-    `org:read`, // read all orgs in the organization
-    `org:create`,
-    `org:update`,
-    `org:delete`,
+    // Organization management
+    { name: 'org:read', description: 'Allows the user to read all organizations in the organization.' },
+    { name: 'org:create', description: 'Allows the user to create a new organization.' },
+    { name: 'org:update', description: 'Allows the user to update an organization.' },
+    { name: 'org:delete', description: 'Allows the user to delete an organization.' },
 ];
+
 export const sysOrgManagementPermissions = [
     ...orgManagementPermissions,
-    `org:read:all`, // read all orgs in all organizations
-    `org:create:all`,
-    `org:update:all`,
-    `org:delete:all`,
-]
+    { name: 'org:read:all', description: 'Allows the user to read all organizations across the system.' },
+    { name: 'org:create:all', description: 'Allows the user to create new organizations across the system.' },
+    { name: 'org:update:all', description: 'Allows the user to update any organization in the system.' },
+    { name: 'org:delete:all', description: 'Allows the user to delete any organization in the system.' },
+];
 
 export const formManagementPermissions = [
-    // form management
-    `form:read`, // read all forms in the organization
-    `form:create`,
-    `form:update`,
-    `form:delete`,
-]
+    // Form management
+    { name: 'form:read', description: 'Allows the user to read all forms in the organization.' },
+    { name: 'form:create', description: 'Allows the user to create a new form.' },
+    { name: 'form:update', description: 'Allows the user to update a form.' },
+    { name: 'form:delete', description: 'Allows the user to delete a form.' },
+];
+
 export const sysFormManagementPermissions = [
     ...formManagementPermissions,
-    `form:read:all`, // read all forms in all organizations
-    `form:create:all`,
-    `form:update:all`,
-]
+    { name: 'form:read:all', description: 'Allows the user to read all forms across the system.' },
+    { name: 'form:create:all', description: 'Allows the user to create new forms across the system.' },
+    { name: 'form:update:all', description: 'Allows the user to update any form in the system.' },
+];
+
 export const applicantManagementPermissions = [
-    // applicant management
-    `applicant:read`, // read all applicants in the organization
-    `applicant:create`,
-    `applicant:update`,
-    `applicant:delete`,
-]
+    // Applicant management
+    { name: 'applicant:read', description: 'Allows the user to read all applicants in the organization.' },
+    { name: 'applicant:create', description: 'Allows the user to create a new applicant.' },
+    { name: 'applicant:update', description: 'Allows the user to update an applicant.' },
+    { name: 'applicant:delete', description: 'Allows the user to delete an applicant.' },
+];
+
 export const sysApplicantManagementPermissions = [
     ...applicantManagementPermissions,
-    `applicant:read:all`, // read all applicants in all organizations
-    `applicant:create:all`,
-    `applicant:update:all`,
-]
+    { name: 'applicant:read:all', description: 'Allows the user to read all applicants across the system.' },
+    { name: 'applicant:create:all', description: 'Allows the user to create new applicants across the system.' },
+    { name: 'applicant:update:all', description: 'Allows the user to update any applicant in the system.' },
+];
 
 export const submissionManagementPermissions = [
-    // submission management
-    `submission:read`, // read all submissions in the organization
-    `submission:create`,
-    `submission:update`,
-    `submission:delete`,
-    `submission:update:mark`
-]
+    // Submission management
+    { name: 'submission:read', description: 'Allows the user to read all submissions in the organization.' },
+    { name: 'submission:create', description: 'Allows the user to create a new submission.' },
+    { name: 'submission:update', description: 'Allows the user to update a submission.' },
+    { name: 'submission:delete', description: 'Allows the user to delete a submission.' },
+    { name: 'submission:update:mark', description: 'Allows the user to give a mark for applicants if the submission is only belongs to them' },
+];
+
 export const sysSubmissionManagementPermissions = [
     ...submissionManagementPermissions,
-    `submission:read:all`, // read all submissions in all organizations
-    `submission:create:all`,
-    `submission:update:all`,
-    `submission:delete:all`,
-]
+    { name: 'submission:read:all', description: 'Allows the user to read all submissions across the system.' },
+    { name: 'submission:create:all', description: 'Allows the user to create new submissions across the system.' },
+    { name: 'submission:update:all', description: 'Allows the user to update any submission in the system.' },
+    { name: 'submission:delete:all', description: 'Allows the user to delete any submission in the system.' },
+];
 
 export const paymentManagementPermissions = [
-    // payment management
-    `payment:read`, // read all payments in the organization
-    `payment:create`,
-    `payment:update`,
-    `payment:delete`,
-]
+    // Payment management
+    { name: 'payment:read', description: 'Allows the user to read all payments in the organization.' },
+    { name: 'payment:create', description: 'Allows the user to create a new payment.' },
+    { name: 'payment:update', description: 'Allows the user to update a payment.' },
+    { name: 'payment:delete', description: 'Allows the user to delete a payment.' },
+];
+
 export const sysPaymentManagementPermissions = [
     ...paymentManagementPermissions,
-    `payment:read:all`, // read all payments in all organizations
-    `payment:create:all`,
-    `payment:update:all`,
-    `payment:delete:all`,
-]
+    { name: 'payment:read:all', description: 'Allows the user to read all payments across the system.' },
+    { name: 'payment:create:all', description: 'Allows the user to create new payments across the system.' },
+    { name: 'payment:update:all', description: 'Allows the user to update any payment in the system.' },
+    { name: 'payment:delete:all', description: 'Allows the user to delete any payment in the system.' },
+];
 
-
-//
 export const userManagementPermissions = [
-    // user management
-    `user:read`,// read all users in the organization
-    `user:create`,
-    `user:delete`,
-    `user:update`,
-]
+    // User management
+    { name: 'user:read', description: 'Allows the user to read all users in the organization.' },
+    { name: 'user:create', description: 'Allows the user to create a new user.' },
+    { name: 'user:delete', description: 'Allows the user to delete a user.' },
+    { name: 'user:update', description: 'Allows the user to update a user.' },
+];
 
 export const sysUserManagementPermissions = [
     ...userManagementPermissions,
-
-    `user:read:all`,// read all users in all organizations
-    `user:create:all`,
-    `user:update:all`,
-    `user:delete:all`,
-]
+    { name: 'user:read:all', description: 'Allows the user to read all users across the system.' },
+    { name: 'user:create:all', description: 'Allows the user to create new users across the system.' },
+    { name: 'user:update:all', description: 'Allows the user to update any user in the system.' },
+    { name: 'user:delete:all', description: 'Allows the user to delete any user in the system.' },
+];
 
 export const tenderManagementPermissions = [
-    // tender management
-    `tender:read`, // read all tenders in the organization
-    `tender:create`,
-    `tender:update`,
-    `tender:delete`,
-]
+    // Tender management
+    { name: 'tender:read', description: 'Allows the user to read all tenders in the organization.' },
+    { name: 'tender:create', description: 'Allows the user to create a new tender.' },
+    { name: 'tender:update', description: 'Allows the user to update a tender.' },
+    { name: 'tender:delete', description: 'Allows the user to delete a tender.' },
+];
 
 export const sysTenderManagementPermissions = [
     ...tenderManagementPermissions,
-    `tender:read:all`, // read all tenders in all organizations
-    `tender:create:all`,
-    `tender:update:all`,
-    `tender:delete:all`,
+    { name: 'tender:read:all', description: 'Allows the user to read all tenders across the system.' },
+    { name: 'tender:create:all', description: 'Allows the user to create new tenders across the system.' },
+    { name: 'tender:update:all', description: 'Allows the user to update any tender in the system.' },
+    { name: 'tender:delete:all', description: 'Allows the user to delete any tender in the system.' },
+];
 
-]
 
 
 
@@ -147,6 +164,9 @@ export const sysAdminPermissions = [
     ...sysPaymentManagementPermissions,
     // tender management
     ...sysTenderManagementPermissions,
+    // chat management permission
+    ...sysChatManagementPermissions
+
 ]
 
 export const adminPermissions = [
@@ -163,7 +183,9 @@ export const adminPermissions = [
     // payment management, only read and create
     ...except(paymentManagementPermissions, [`payment:delete`, `payment:update`]),
     // tender management, except delete
-    ...except(tenderManagementPermissions, [`tender:delete`])
+    ...except(tenderManagementPermissions, [`tender:delete`]),
+    // chat management permission
+    ...chatManagementPermissions
 
 ]
 export const procurementPermissions = [
@@ -176,10 +198,12 @@ export const evaluatorPermissions = [
 ]
 
 export const compliancePermissions = [
+    // compliance can read chat
+    ...chatManagementPermissions,
 
 ]
 
-export const userPermission = [
+export const userPermissions = [
     ...userManagementPermissions
 ]
 

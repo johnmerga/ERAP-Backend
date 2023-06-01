@@ -20,3 +20,5 @@ export * as applicantValidator from './applicant.validator';
 export * as submissionValidator from "./submission.validator"
 // chapa payment validator
 export * as paymentValidator from './payment.validator';
+// permission validator
+export * as permissionValidator from './permission.validator';

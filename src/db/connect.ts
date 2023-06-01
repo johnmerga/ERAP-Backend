@@ -1,23 +1,40 @@
 import mongoose from "mongoose";
 import config from "../config/config";
-import logger from "../logger/logger";
+import Logger from "../logger/logger";
+import { Permission, permissionList } from "../model/permission";
+
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 export const connect = async () => {
-     await mongoose.connect(`${config.mongoose.url}`, {});
+    await mongoose.connect(`${config.mongoose.url}`, {});
 }
 
 mongoose.connection.on('connecting', function () {
-    isDevelopment ? logger.info('...connecting to local MongoDB') : logger.info('...connecting to MongoDB Atlas')
+    isDevelopment ? Logger.info('...connecting to local MongoDB') : Logger.info('...connecting to MongoDB Atlas')
 })
 
 mongoose.connection.on('error', function () {
-    logger.error("Could not connect to MongoDB");
+    Logger.error("Could not connect to MongoDB");
     process.exit(1);
 })
 
 mongoose.connection.on('connected', function () {
-    logger.info("MongoDB Connected")
+    (async () => {
+        Logger.info("MongoDB Connected")
+        const countPermissionsInDB = await Permission.estimatedDocumentCount()
+        const allPermissionsLength = permissionList.auctionPlatformPermissions.length
+        if (countPermissionsInDB < allPermissionsLength) {
+            Logger.warn(`permissions in db: ${countPermissionsInDB}, all permissions: ${allPermissionsLength}, permissions should be added to db`)
+        }
+        if (countPermissionsInDB === 0) {
+            Logger.warn(`add permissions to db`)
+            await Permission.insertMany(permissionList.auctionPlatformPermissions)
+        }
+    })()
+
+
+
+
 })
 
 mongoose.connection.on('reconnected', function () {
@@ -26,7 +43,7 @@ mongoose.connection.on('reconnected', function () {
 
 
 mongoose.connection.on('disconnected', function () {
-    logger.error("MongoDB Disconnected");
+    Logger.error("MongoDB Disconnected");
 
 })
 

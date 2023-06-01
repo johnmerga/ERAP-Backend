@@ -17,15 +17,19 @@ export class UserRouter {
 
     public routes(): Router {
         // create user
-        this.router.route('/').post(validate(userValidator.createUser), this.userController.createUser);
+        this.router.route('/').post(validate(userValidator.createUser), authorizeMiddleware([Role.SysAdmin, Role.Admin], ['user:create']), this.userController.createUser);
         // get users 
-        this.router.route('/').get(validate(userValidator.getUsers), authorizeMiddleware([Role.SysAdmin,Role.Admin], ['user:update']), this.userController.getUsers);// this is only for sample
+        this.router.route('/').get(validate(userValidator.getUsers), authorizeMiddleware([Role.SysAdmin, Role.Admin], ['user:update']), this.userController.getUsers);// this is only for sample
         // get user by id
         this.router.route('/:userId').get(validate(userValidator.getUser), this.userController.getUser);
+        // update admin by id
+        this.router.route('/admin').patch(validate(userValidator.updateAdmin), authorizeMiddleware([Role.SysAdmin, Role.Admin], ['user:update']), this.userController.updateAdminById);
+        // update user role and permission by id
+        this.router.route('/staff/:userId').patch(validate(userValidator.updateUserRoleAndPermission), authorizeMiddleware([Role.SysAdmin, Role.Admin], ['user:update']), this.userController.updateUserRoleAndPermission);
         // update user by id
-        this.router.route('/:userId').patch(validate(userValidator.updateUser), this.userController.updateUser);
+        this.router.route('/').patch(validate(userValidator.updateUser), authorizeMiddleware([...Object.values(Role)], ['user:update']), this.userController.updateUser);
         // delete user by id
-        this.router.route('/:userId').delete(validate(userValidator.deleteUser), this.userController.deleteUser);
+        this.router.route('/:userId').delete(validate(userValidator.deleteUser), authorizeMiddleware([...Object.values(Role)], ['user:delete']), this.userController.deleteUser);
 
         return this.router;
     }
