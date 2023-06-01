@@ -21,7 +21,7 @@ export class TenderRouter {
         // get published tenders
         this.router.route('/published').get(validate(tenderValidator.getPublishedTenders), this.tenderController.getPublishedTenders);
         // get my tenders
-        this.router.route('/my-tenders').get(validate(tenderValidator.getTenders), this.tenderController.getMyTenders);
+        this.router.route('/my-tenders').get(validate(tenderValidator.getMyTenders), this.tenderController.getMyTenders);
         // get tender by id
         this.router.route('/:tenderId').get(validate(tenderValidator.getTender), this.tenderController.getTenderById);
         // get tender applicants

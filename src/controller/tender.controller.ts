@@ -26,7 +26,7 @@ export class TenderController {
     getTenders = catchAsync(async (req: Request, res: Response) => {
         const filter = pick(req.query, ['orgId', 'status', 'type', 'sector',])
         const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy', 'search'])
-        const compare = req.body
+        const compare = pick(req.query, ['openDate', 'closeDate', 'bidDeadline', 'price'])
         const tenders = await this.tenderService.queryTenders(filter, options, compare)
         res.status(httpStatus.OK).send(tenders)
     })
@@ -34,15 +34,15 @@ export class TenderController {
     getPublishedTenders = catchAsync(async (req: Request, res: Response) => {
         const filter = pick(req.query, ['sector',])
         const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy', 'search'])
-        const compare = req.body
+        const compare = pick(req.query, ['openDate', 'closeDate', 'bidDeadline', 'price'])
         const tenders = await this.tenderService.queryPublishedTenders(req.user!, filter, options, compare,)
         res.status(httpStatus.OK).send(tenders)
     })
     // get only my tenders
     getMyTenders = catchAsync(async (req: Request, res: Response) => {
-        const filter = pick(req.query, ['orgId', 'status', 'type', 'sector',])
+        const filter = pick(req.query, ['status', 'type', 'sector',])
         const options = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy', 'search'])
-        const compare = req.body
+        const compare = pick(req.query, ['openDate', 'closeDate', 'bidDeadline', 'price'])
         const tenders = await this.tenderService.queryMyTenders(req.user!, filter, options, compare,)
         res.status(httpStatus.OK).send(tenders)
     })
