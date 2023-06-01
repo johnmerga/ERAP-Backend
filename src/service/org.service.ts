@@ -109,10 +109,19 @@ export class OrgService {
     // update organization rating
     public async updateOrgRating(orgId: string, updateRating: UpdateOrgBody, user: IUserDoc): Promise<IOrganizationDoc> {
         try {
-            if (!updateRating.rating) throw new ApiError(httpStatus.BAD_REQUEST, 'rating should be provided')
+            if (Number(updateRating.rating) !== 0 && !updateRating.rating) throw new ApiError(httpStatus.BAD_REQUEST, 'rating should be provided')
             if (!user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, `user with no organization can't rate organizations`)
             if (user.orgId.toHexString() === orgId) throw new ApiError(httpStatus.BAD_REQUEST, `you can't rate your own organization`)
-            const org = await this.updateOrgProfile(orgId, updateRating)
+            const org = await this.orgDal.getOneOrg(orgId)
+            const prevRating = Number(org.rating)
+            if (prevRating === 0) {
+                const newRating = Number(updateRating.rating)
+                org.rating = newRating
+            } else {
+                const newRating = (prevRating + Number(updateRating.rating)) / 2
+                org.rating = Number(newRating.toFixed(2))
+            }
+            await org.save()
             return org
         } catch (error) {
             if (error instanceof ApiError) throw error
