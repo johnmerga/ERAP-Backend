@@ -5,10 +5,10 @@ import { ITenderDoc, ITenderQuery, NewTender, Tender, TenderStatus, UpdateTender
 import { IOptions, QueryResult } from "../utils";
 import { ApplicantQuery, } from "../model/applicants";
 import { ApplicantService } from "./applicant.service";
-import moment from "moment";
 import { IUserDoc } from "../model/user";
 import { OrgService } from "./org.service";
 import { ORG_STATUS } from "../model/organization";
+import { returnComparedObj } from "../utils/compareQuery";
 
 
 export class TenderService {
@@ -35,39 +35,7 @@ export class TenderService {
     async queryTenders(filter: Record<string, any>, options: IOptions, compare?: ITenderQuery): Promise<QueryResult> {
         try {
             if (compare) {
-                let comparators = {}
-                if (compare.openDate) {
-                    compare.openDate[0] ? moment(compare.openDate[0]).toDate() : undefined
-                    compare.openDate[1] ? moment(compare.openDate[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        openDate: [compare.openDate[0], compare.openDate[1]]
-                    }
-                }
-                if (compare.bidDeadline) {
-                    compare.bidDeadline[0] ? moment(compare.bidDeadline[0]).toDate() : undefined
-                    compare.bidDeadline[1] ? moment(compare.bidDeadline[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        bidDeadline: [compare.bidDeadline[0], compare.bidDeadline[1]]
-                    }
-                }
-                if (compare.closeDate) {
-                    compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : undefined
-                    compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        closeDate: [compare.closeDate[0], compare.closeDate[1]]
-                    }
-                }
-                if (compare.price) {
-                    compare.price[0] ? compare.price[0] : undefined
-                    compare.price[1] ? compare.price[1] : undefined
-                    comparators = {
-                        ...comparators,
-                        price: [compare.price[0], compare.price[1]]
-                    }
-                }
+                let comparators = returnComparedObj(compare)
                 options = {
                     ...options,
                     compare: comparators
@@ -88,39 +56,7 @@ export class TenderService {
     async queryPublishedTenders(user: IUserDoc, filter: Record<string, any>, options: IOptions, compare?: ITenderQuery,): Promise<QueryResult> {
         try {
             if (compare) {
-                let comparators = {}
-                if (compare.openDate) {
-                    compare.openDate[0] ? moment(compare.openDate[0]).toDate() : undefined
-                    compare.openDate[1] ? moment(compare.openDate[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        openDate: [compare.openDate[0], compare.openDate[1]]
-                    }
-                }
-                if (compare.bidDeadline) {
-                    compare.bidDeadline[0] ? moment(compare.bidDeadline[0]).toDate() : undefined
-                    compare.bidDeadline[1] ? moment(compare.bidDeadline[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        bidDeadline: [compare.bidDeadline[0], compare.bidDeadline[1]]
-                    }
-                }
-                if (compare.closeDate) {
-                    compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : undefined
-                    compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        closeDate: [compare.closeDate[0], compare.closeDate[1]]
-                    }
-                }
-                if (compare.price) {
-                    compare.price[0] ? compare.price[0] : undefined
-                    compare.price[1] ? compare.price[1] : undefined
-                    comparators = {
-                        ...comparators,
-                        price: [compare.price[0], compare.price[1]]
-                    }
-                }
+                let comparators = returnComparedObj(compare)
                 options = {
                     ...options,
                     compare: comparators
@@ -147,39 +83,7 @@ export class TenderService {
     async queryMyTenders(user: IUserDoc, filter: Record<string, any>, options: IOptions, compare?: ITenderQuery,): Promise<QueryResult> {
         try {
             if (compare) {
-                let comparators = {}
-                if (compare.openDate) {
-                    compare.openDate[0] ? moment(compare.openDate[0]).toDate() : undefined
-                    compare.openDate[1] ? moment(compare.openDate[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        openDate: [compare.openDate[0], compare.openDate[1]]
-                    }
-                }
-                if (compare.bidDeadline) {
-                    compare.bidDeadline[0] ? moment(compare.bidDeadline[0]).toDate() : undefined
-                    compare.bidDeadline[1] ? moment(compare.bidDeadline[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        bidDeadline: [compare.bidDeadline[0], compare.bidDeadline[1]]
-                    }
-                }
-                if (compare.closeDate) {
-                    compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : undefined
-                    compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : undefined
-                    comparators = {
-                        ...comparators,
-                        closeDate: [compare.closeDate[0], compare.closeDate[1]]
-                    }
-                }
-                if (compare.price) {
-                    compare.price[0] ? compare.price[0] : undefined
-                    compare.price[1] ? compare.price[1] : undefined
-                    comparators = {
-                        ...comparators,
-                        price: [compare.price[0], compare.price[1]]
-                    }
-                }
+                let comparators = returnComparedObj(compare)
                 options = {
                     ...options,
                     compare: comparators

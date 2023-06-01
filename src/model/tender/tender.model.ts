@@ -32,7 +32,7 @@ export interface ITenderQuery {
     openDate?: [Date | undefined, Date | undefined],
     bidDeadline?: [Date | undefined, Date | undefined],
     closeDate?: [Date | undefined, Date | undefined],
-    price?: [Date | undefined, number | undefined],
+    price?: [number | undefined, number | undefined],
 }
 
 export interface ITenderModel extends Model<ITenderDoc> {
