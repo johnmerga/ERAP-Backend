@@ -49,8 +49,10 @@ export class SubmissionService {
     }
     async create(submission: NewSubmissionValidator, user: IUserDoc): Promise<ISubmissionDoc> {
         try {
-            const tenderOrgId = (await this.tenderService.getTenderById(submission.tenderId)).orgId
-            if (!tenderOrgId || tenderOrgId === user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, "You can't bid on your own tender or ")
+            const tender = (await this.tenderService.getTenderById(submission.tenderId))
+            if (!tender.orgId || tender.orgId === user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, "You can't bid on your own tender or ")
+            // checking if the bid deadline is passed
+            if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             await this.checkBidFormOrg({
                 formId: submission.formId,
                 orgId: user.orgId.toString(),
@@ -86,6 +88,9 @@ export class SubmissionService {
     async updateSubmission(submissionId: string, update: UpdateSubmissionBody): Promise<ISubmissionDoc> {
         try {
             const submission = await this.submissionDAL.findSubmission(submissionId)
+            // checking if the bid deadline is passed
+            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
 
             await this.checkBidFormOrg({
                 formId: update.formId,
@@ -109,6 +114,9 @@ export class SubmissionService {
     async giveMark(submissionId: string, marks: AnswerEvaluation[]): Promise<ISubmissionDoc> {
         try {
             const submission = await this.submissionDAL.findSubmission(submissionId)
+            // checking if the closing date is passed
+            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            if (tender.closeDate < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Tender closing date is passed")
 
             const submissionWithForm = (await submission.populate('formId'))
             const form = submissionWithForm.formId as unknown as IFormDoc
@@ -249,6 +257,9 @@ export class SubmissionService {
     async addAnswers(submissionId: string, answers: IAnswer[]): Promise<ISubmissionDoc> {
         try {
             const submission = await this.findSubmission(submissionId)
+            // checking if the bid deadline is passed
+            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             // check if the questionIds are valid
             const submissionsAnswersQuestionsIds = answers.map((answer) => answer.questionId)
             const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionsAnswersQuestionsIds)
@@ -267,6 +278,9 @@ export class SubmissionService {
     async updateAnswers(submissionId: string, answers: IAnswer[]): Promise<ISubmissionDoc> {
         try {
             const submission = await this.findSubmission(submissionId)
+            // checking if the bid deadline is passed
+            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             //check if the answerIds are valid
             const submissionAnswersIds = submission.answers.map((answer) => answer.id)
             const isValidAnswerIds = await checkIdsInSubDocs(Submission, submissionId, 'answers', submissionAnswersIds)
@@ -289,6 +303,9 @@ export class SubmissionService {
     async deleteAnswers(submissionId: string, answerIds: IAnswer[]): Promise<ISubmissionDoc> {
         try {
             const submission = await this.findSubmission(submissionId)
+            // checking if the bid deadline is passed
+            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             //check if the answerIds are valid
             const submissionAnswersIds = submission.answers.map((answer) => answer.id)
             const isValidAnswerIds = await checkIdsInSubDocs(Submission, submissionId, 'answers', submissionAnswersIds)
