@@ -2,7 +2,7 @@ import { randomUUID, } from "crypto";
 import { PaymentDal, } from "../../dal";
 import { IPaymentInfo, IPaymentInfoDoc, NewPaymentInputType, NewPaymentInputTypeFormatter, PaymentParams, SuccessPaymentResponse } from "../../model/payment/payment.model";
 import { IChapaPaymentInitiation, PaymentInfo, PaymentStatus } from "../../model/payment";
-import { chapaService, TenderService, ApplicantService, FormService } from "../../service";
+import { chapaService, TenderService, ApplicantService, FormService, OrgService } from "../../service";
 import { IUserDoc } from "../../model/user";
 import { ApiError } from "../../errors";
 import httpStatus from "http-status";
@@ -18,12 +18,14 @@ export class PaymentService {
     private formService: FormService;
     private tenderService: TenderService;
     private applicantService: ApplicantService;
+    private orgService: OrgService
     constructor() {
         this.chapaService = new chapaService();
         this.paymentDal = new PaymentDal();
         this.tenderService = new TenderService();
         this.applicantService = new ApplicantService();
         this.formService = new FormService();
+        this.orgService = new OrgService()
     }
     // format the payment body
     async formatPaymentBody(paymentInfo: NewPaymentInputTypeFormatter): Promise<PaymentParams> {
@@ -48,7 +50,9 @@ export class PaymentService {
     async payWithChapa(inputData: NewPaymentInputType, user: IUserDoc): Promise<SuccessPaymentResponse> {
         try {
             if (!user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'User does not have an organization');
-            const tender = await this.tenderService.getTenderById(inputData.tenderId);
+            const tender = (await this.tenderService.getTenderById(inputData.tenderId))
+            const org = await this.orgService.findOrgById(user.orgId.toString())
+            if (org.status !== 'VERIFIED') throw new ApiError(httpStatus.BAD_REQUEST, `payment can't proceed because your organization is not verified`)
             if (tender.status !== TenderStatus.PUBLISHED) throw new ApiError(httpStatus.BAD_REQUEST, 'Tender is not published yet');
             const queryFormByTenderId = await this.formService.queryForms({ tenderId: tender.id }, {})
             if (queryFormByTenderId.totalResults === 0) {
