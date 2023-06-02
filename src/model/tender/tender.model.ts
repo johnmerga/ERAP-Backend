@@ -1,10 +1,10 @@
-import { Model, Document, } from "mongoose";
+import { Model, Document,Types } from "mongoose";
 import { TenderStatus, TenderType } from './tender.status'
 import { ORG_SECTOR_TYPE } from "../organization";
 import { QueryResult } from "../../utils";
 TenderStatus
 export interface ITender {
-    orgId: string,
+    orgId: Types.ObjectId,
     title: string,
     description: string,
     type: TenderType,
@@ -14,7 +14,7 @@ export interface ITender {
     openDate: Date,
     bidDeadline: Date,
     closeDate: Date,
-    applicants: string[],
+    applicants: Types.ObjectId[],
     price: number,
     createdAt: Date,
     updatedAt: Date,

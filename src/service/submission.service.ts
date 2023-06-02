@@ -4,7 +4,7 @@ import { ApiError } from "../errors";
 import httpStatus from "http-status";
 import { ISubmissionDoc, Submission, UpdateSubmissionBody } from "../model/submission";
 import { IOptions, Operation, QueryResult, } from "../utils";
-import { Tender } from "../model/tender";
+import { ITenderDoc, Tender } from "../model/tender";
 import { Organization } from "../model/organization";
 import { IFormDoc, IFormFieldsDoc, Form } from "../model/form";
 import { checkIdsInSubDocs } from "../utils/";
@@ -49,8 +49,8 @@ export class SubmissionService {
     }
     async create(submission: NewSubmissionValidator, user: IUserDoc): Promise<ISubmissionDoc> {
         try {
-            const tender = (await this.tenderService.getTenderById(submission.tenderId))
-            if (!tender.orgId || tender.orgId === user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, "You can't bid on your own tender or ")
+            const tender = (await this.tenderService.getTenderById(submission.tenderId, user))
+            if (!tender.orgId || tender.orgId.toString() === user.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, "You can't bid on your own tender or ")
             // checking if the bid deadline is passed
             if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             await this.checkBidFormOrg({
@@ -72,7 +72,7 @@ export class SubmissionService {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Error Happened While creating Submission")
         }
     }
-    async findSubmission(submissionId: string): Promise<ISubmission> {
+    async findSubmission(submissionId: string): Promise<ISubmissionDoc> {
         return await this.submissionDAL.findSubmission(submissionId)
     }
     async querySubmissions(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
@@ -85,17 +85,17 @@ export class SubmissionService {
     /**
      * this function is used to update the submission except the answers
      */
-    async updateSubmission(submissionId: string, update: UpdateSubmissionBody): Promise<ISubmissionDoc> {
+    async updateSubmission(submissionId: string, update: UpdateSubmissionBody, user: IUserDoc): Promise<ISubmissionDoc> {
         try {
             const submission = await this.submissionDAL.findSubmission(submissionId)
             // checking if the bid deadline is passed
-            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            const tender = await this.tenderService.getTenderById(submission.tenderId.toString(), user)
             if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
 
             await this.checkBidFormOrg({
-                formId: update.formId,
-                orgId: update.orgId,
-                tenderId: update.tenderId
+                formId: update.formId?.toString(),
+                orgId: update.orgId?.toString(),
+                tenderId: update.tenderId?.toString()
             })
             // take everything except answers
             const { answers, ...rest } = update
@@ -111,11 +111,15 @@ export class SubmissionService {
 
     }
     // evaluation mark for answers
-    async giveMark(submissionId: string, marks: AnswerEvaluation[]): Promise<ISubmissionDoc> {
+    async giveMark(submissionId: string, marks: AnswerEvaluation[], evaluator: IUserDoc): Promise<ISubmissionDoc> {
         try {
-            const submission = await this.submissionDAL.findSubmission(submissionId)
+            const submission = await ((await this.submissionDAL.findSubmission(submissionId)).populate('tenderId'))
+            if (!submission || typeof submission.tenderId === 'string') throw new ApiError(httpStatus.NOT_FOUND, 'unable to give mark: submission not found or tenderId is not populated')
+            
+            // checking if the evaluator belongs to the organization that created the tender
+            const tender = submission.tenderId as unknown as ITenderDoc
+            if (tender.orgId.toString() !== evaluator.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, "You are not allowed to give mark for this submission")
             // checking if the closing date is passed
-            const tender = await this.tenderService.getTenderById(submission.tenderId)
             if (tender.closeDate < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Tender closing date is passed")
 
             const submissionWithForm = (await submission.populate('formId'))
@@ -221,7 +225,7 @@ export class SubmissionService {
             const submission = await Submission.findById(submissionId).populate('formId')
             if (!submission) throw new ApiError(httpStatus.NOT_FOUND, 'unable to get submission: submission not found')
             if (typeof submission.formId === 'string') throw new Error('formId is not populated')
-            const form = submission.formId as IFormDoc
+            const form = submission.formId as unknown as IFormDoc
             const submissionAnswers = submission.answers
             const formQuestions = form.fields
             const populatedAnswers = submissionAnswers.map((answer) => {
@@ -254,15 +258,18 @@ export class SubmissionService {
      */
 
     // add submission answers
-    async addAnswers(submissionId: string, answers: IAnswer[]): Promise<ISubmissionDoc> {
+    async addAnswers(submissionId: string, answers: IAnswer[], user: IUserDoc): Promise<ISubmissionDoc> {
         try {
-            const submission = await this.findSubmission(submissionId)
+            const submission = (await this.findSubmission(submissionId)).populate('tenderId') as unknown as ISubmissionDoc
+            // user auth check 
+            if (submission.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, "You are not allowed to add answers for this submission")
+            if (!submission || (typeof submission.tenderId === 'string')) throw new ApiError(httpStatus.NOT_FOUND, 'unable to add answers: submission not found or tenderId is not populated')
             // checking if the bid deadline is passed
-            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            const tender = submission.tenderId as unknown as ITenderDoc
             if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             // check if the questionIds are valid
             const submissionsAnswersQuestionsIds = answers.map((answer) => answer.questionId)
-            const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionsAnswersQuestionsIds)
+            const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId.toString(), 'fields', submissionsAnswersQuestionsIds)
             if (isValidQuestionIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidQuestionIds.message)
             // add answers
             return await this.submissionDAL.updateSubmission(submissionId, {
@@ -275,11 +282,14 @@ export class SubmissionService {
         }
     }
     // update submission answers
-    async updateAnswers(submissionId: string, answers: IAnswer[]): Promise<ISubmissionDoc> {
+    async updateAnswers(submissionId: string, answers: IAnswer[], user: IUserDoc): Promise<ISubmissionDoc> {
         try {
-            const submission = await this.findSubmission(submissionId)
+            const submission = (await this.findSubmission(submissionId)).populate('tenderId') as unknown as ISubmissionDoc
+            if (!submission || (typeof submission.tenderId === 'string')) throw new ApiError(httpStatus.NOT_FOUND, 'unable to update answers: submission not found or tenderId is not populated')
+            // user auth check
+            if (submission.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, "You are not allowed to add answers for this submission")
             // checking if the bid deadline is passed
-            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            const tender = submission.tenderId as unknown as ITenderDoc
             if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             //check if the answerIds are valid
             const submissionAnswersIds = submission.answers.map((answer) => answer.id)
@@ -287,7 +297,7 @@ export class SubmissionService {
             if (isValidAnswerIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidAnswerIds.message)
             // check if the questionIds are valid
             const submissionsAnswersQuestionsIds = answers.map((answer) => answer.questionId)
-            const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId, 'fields', submissionsAnswersQuestionsIds)
+            const isValidQuestionIds = await checkIdsInSubDocs(Form, submission.formId.toString(), 'fields', submissionsAnswersQuestionsIds)
             if (isValidQuestionIds instanceof Error) throw new ApiError(httpStatus.BAD_REQUEST, isValidQuestionIds.message)
             // update answers
             return await this.submissionDAL.updateSubmission(submissionId, {
@@ -300,11 +310,14 @@ export class SubmissionService {
         }
     }
     // delete submission answers
-    async deleteAnswers(submissionId: string, answerIds: IAnswer[]): Promise<ISubmissionDoc> {
+    async deleteAnswers(submissionId: string, answerIds: IAnswer[], user: IUserDoc): Promise<ISubmissionDoc> {
         try {
-            const submission = await this.findSubmission(submissionId)
+            const submission = (await this.findSubmission(submissionId)).populate('tenderId') as unknown as ISubmissionDoc
+            if (!submission || (typeof submission.tenderId === 'string')) throw new ApiError(httpStatus.NOT_FOUND, 'unable to update answers: submission not found or tenderId is not populated')
+            // user auth check
+            if (submission.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, "You are not allowed to add answers for this submission")
             // checking if the bid deadline is passed
-            const tender = await this.tenderService.getTenderById(submission.tenderId)
+            const tender = submission.tenderId as unknown as ITenderDoc
             if (tender.bidDeadline < new Date()) throw new ApiError(httpStatus.BAD_REQUEST, "Bid deadline is passed")
             //check if the answerIds are valid
             const submissionAnswersIds = submission.answers.map((answer) => answer.id)

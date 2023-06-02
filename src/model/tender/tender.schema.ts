@@ -5,7 +5,7 @@ import { paginate, toJSON } from "../../utils";
 
 const tenderSchema = new Schema<ITenderDoc, ITenderModel>({
     orgId: {
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'Organization',
         required: true,
     },
@@ -52,7 +52,7 @@ const tenderSchema = new Schema<ITenderDoc, ITenderModel>({
         required: true,
     },
     applicants: {
-        type: [String],
+        type: [Schema.Types.ObjectId],
         ref: 'Applicant',
         default: [],
     },

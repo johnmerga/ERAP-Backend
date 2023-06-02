@@ -6,17 +6,17 @@ import { answerSchema } from "./answer.schema";
 
 const submissionSchema = new Schema<ISubmissionDoc, ISubmissionModel>({
     tenderId: {
-        type: String,
-        ref: "Bid",
+        type: Schema.Types.ObjectId,
+        ref: "Tender",
         required: true,
     },
     orgId: {
-        type: String,
-        ref: "Org",
+        type: Schema.Types.ObjectId,
+        ref: "Organization",
         required: true,
     },
     formId: {
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: "Form",
         required: true,
     },

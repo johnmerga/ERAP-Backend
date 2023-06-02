@@ -152,8 +152,8 @@ export class PermissionMigration {
 
 (async () => {
     const permissionMigration = new PermissionMigration()
-    const allPermission = await permissionMigration.saveAllPermissionToDB()
-    console.log(allPermission)
+    const allPermission = await permissionMigration.comparePermission()
+    console.dir(allPermission, { depth: null })
     // console.dir(allPermission.numberOfPermissionToBeAddedToMigrationFile.onlyNewList, { depth: null })
 }
 )()

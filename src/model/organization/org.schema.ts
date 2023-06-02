@@ -10,7 +10,7 @@ import { ORG_STATUS } from './org.status'
 
 const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
     owner: {
-        type: String,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: "User",
     },
@@ -49,6 +49,11 @@ const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
         type: Number,
         default: null,
     },
+    tenderInvitations: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Tender',
+        default: [],
+    }],
     createdAt: {
         type: Date,
         default: Date.now,

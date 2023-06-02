@@ -1,4 +1,4 @@
-import { Document, Model, } from 'mongoose';
+import mongoose, { Document, Model, } from 'mongoose';
 import { PaymentStatus, PaymentType } from './payment.type';
 
 // store payer information
@@ -10,8 +10,8 @@ export interface IPayer {
 }
 
 export interface IPaymentInfo {
-    tenderId: string;
-    orgId: string;
+    tenderId: mongoose.Types.ObjectId;
+    orgId: mongoose.Types.ObjectId;
     tx_ref: string;
     amount: number;
     payerInfo: IPayer;
