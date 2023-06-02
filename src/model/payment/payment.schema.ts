@@ -7,12 +7,12 @@ import { paginate, toJSON } from "../../utils";
 // Schema for a payment information
 const paymentInfoSchema = new Schema<IPaymentInfo, IPaymentInfoModel>({
     orgId: {
-        type: String,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: "Organization",
     },
     tenderId: {
-        type: String,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: "Tender",
     },

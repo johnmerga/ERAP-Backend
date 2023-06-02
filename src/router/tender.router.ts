@@ -16,8 +16,12 @@ export class TenderRouter {
     public routes(): Router {
         // create tender
         this.router.route('/').post(validate(tenderValidator.createTender), this.tenderController.createTender);
+        // invite tender
+        this.router.route('/:tenderId/invite').post(validate(tenderValidator.inviteTender), this.tenderController.inviteTender);
         // get tenders 
         this.router.route('/').get(validate(tenderValidator.getTenders), this.tenderController.getTenders);
+        // get my invitations
+        this.router.route('/invitations').get(validate(tenderValidator.getTenders), this.tenderController.getInvitedTenders);
         // get published tenders
         this.router.route('/published').get(validate(tenderValidator.getPublishedTenders), this.tenderController.getPublishedTenders);
         // get my tenders

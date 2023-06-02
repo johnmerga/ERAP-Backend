@@ -14,15 +14,15 @@ export const returnComparedObj = (compare: ITenderQuery): Record<string, any> =>
         }
         if (compare.bidDeadline) {
             compare.bidDeadline[0] = compare.bidDeadline[0] ? moment(compare.bidDeadline[0]).toDate() : moment().add(-100, 'years').toDate()
-            compare.bidDeadline[1] = compare.bidDeadline[0] ? moment(compare.bidDeadline[1]).toDate() : moment().add(100, 'years').toDate()
+            compare.bidDeadline[1] = compare.bidDeadline[1] ? moment(compare.bidDeadline[1]).toDate() : moment().add(100, 'years').toDate()
             comparators = {
                 ...comparators,
                 bidDeadline: [compare.bidDeadline[0], compare.bidDeadline[1]]
             }
         }
         if (compare.closeDate) {
-            compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : moment().add(-100, 'years').toDate()
-            compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : moment().add(100, 'years').toDate()
+            compare.closeDate[0] = compare.closeDate[0] ? moment(compare.closeDate[0]).toDate() : moment().add(-100, 'years').toDate()
+            compare.closeDate[1] = compare.closeDate[1] ? moment(compare.closeDate[1]).toDate() : moment().add(100, 'years').toDate()
             comparators = {
                 ...comparators,
                 closeDate: [compare.closeDate[0], compare.closeDate[1]]

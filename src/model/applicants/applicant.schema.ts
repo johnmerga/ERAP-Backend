@@ -5,12 +5,12 @@ import { paginate, toJSON } from "../../utils";
 
 const applicantSchema = new Schema<IApplicantDoc, IApplicantModel>({
     tenderId: {
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'Tender',
         required: true,
     },
     orgId: {
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'Organization',
         required: true,
     },
@@ -19,8 +19,8 @@ const applicantSchema = new Schema<IApplicantDoc, IApplicantModel>({
         required: true,
     },
     paymentId: {
-        type: String,
-        ref: 'Payment',
+        type: Schema.Types.ObjectId,
+        ref: 'PaymentInfo',
         required: true,
     },
     createdAt: {

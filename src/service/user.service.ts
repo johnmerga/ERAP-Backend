@@ -46,6 +46,9 @@ export class UserService {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
         }
         const userPermissionList = []
+        if (!userBody.roles.includes(Role.User)) {
+            userBody.roles.push(Role.User)
+        }
         for (const permission of userBody.roles) {
             const permissions = await this.permissionService.getPermissionIdsByRole(permission)
             userPermissionList.push(...permissions)
@@ -181,7 +184,7 @@ export class UserService {
             if (updateBody.roles && updateBody.permissions) {
                 const userPermissionList = []
                 // always give a user the user role 
-                if (!updateBody.roles.includes(Role.User)) {
+                if (!updateBody.roles.includes(Role.User) || Object.keys(updateBody.roles).length === 0) {
                     updateBody.roles.push(Role.User)
                 }
                 const listOfAskedPermissions = updateBody.permissions as unknown as string[]
@@ -207,6 +210,9 @@ export class UserService {
             // if the updateBody has only roles, first based on the given role gives automatically associated permissions, then adds the permissions if the permissions is different from the current permissions
             else if (updateBody.roles) {
                 const userPermissionList = []
+                if (!updateBody.roles.includes(Role.User) || Object.keys(updateBody.roles).length === 0) {
+                    updateBody.roles.push(Role.User)
+                }
                 for (const permission of updateBody.roles) {
                     const permissions = await this.permissionService.getPermissionIdsByRole(permission)
                     userPermissionList.push(...permissions)

@@ -23,20 +23,20 @@ const createTenderCompareBody: Record<keyof ITenderQuery, any> = {
         joi.alternatives().try(
             joi.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
             joi.string().valid('').label(`"if you don't want to pass only the first arguments(parameter) use and empty string like this-> ""`)
-            ).default("").optional(),
+        ).default("").optional(),
         joi.alternatives().try(
             joi.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/)),
-            joi.string().valid('').label(`"if you don't want to pass only the first arguments(parameter) use and empty string like this-> ""`)
+        joi.string().valid('').label(`"if you don't want to pass only the first arguments(parameter) use and empty string like this-> ""`)
             .default("").optional())
         .optional().min(1).label(`example of date format: ['2021-01-01', '2021-01-01']`),
     closeDate: joi.array().items(
         joi.alternatives().try(
             joi.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
             joi.string().valid('').label(`"if you don't want to pass only the first arguments(parameter) use and empty string like this-> ""`)
-            ).default("").optional(),
+        ).default("").optional(),
         joi.alternatives().try(
             joi.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/)),
-            joi.string().valid('').label(`"if you don't want to pass only the first arguments(parameter) use and empty string like this-> ""`)
+        joi.string().valid('').label(`"if you don't want to pass only the first arguments(parameter) use and empty string like this-> ""`)
             .default("").optional()
     ).
         optional().min(1).label(`example of date format: ['2021-01-01', '2021-01-01']`),
@@ -133,6 +133,24 @@ export const getTenders = {
     }),
     // body: joi.object().keys(createTenderCompareBody).options({ abortEarly: false }),
 }
+export const getTenderInvitations = {
+    // query: joi.object().keys({
+    //     search: joi.string().trim(),
+    //     orgId: joi.string().custom(objectId),
+    //     status: tenderBody.status,
+    //     type: tenderBody.type,
+    //     sector: tenderBody.sector,
+    //     price: reusableTenderComparableBody.price,
+    //     openDate: reusableTenderComparableBody.openDate,
+    //     closeDate: reusableTenderComparableBody.closeDate,
+    //     bidDeadline: reusableTenderComparableBody.bidDeadline,
+    //     page: joi.number().min(1),
+    //     limit: joi.number().min(1),
+    //     sortBy: joi.string(),
+    //     projectBy: joi.string(),
+    // }),
+    // body: joi.object().keys(createTenderCompareBody).options({ abortEarly: false }),
+}
 export const getMyTenders = {
     query: joi.object().keys({
         search: joi.string().trim(),
@@ -194,4 +212,13 @@ export const deleteTender = {
     params: joi.object().keys({
         tenderId: joi.string().custom(objectId),
     }),
+}
+
+export const inviteTender = {
+    params: joi.object().keys({
+        tenderId: joi.string().custom(objectId),
+    }),
+    body: joi.object().keys({
+        orgIds: joi.array().items(joi.string().custom(objectId)).min(1).required(),
+    })
 }

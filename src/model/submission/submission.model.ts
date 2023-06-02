@@ -1,10 +1,10 @@
-import { Model, Document, Schema } from "mongoose"
+import { Model, Document, Schema, Types } from "mongoose"
 import { IAnswer, NewAnswer } from "./answer.model";
 
 export interface ISubmission {
-    tenderId: string;
-    orgId: string;
-    formId: string;
+    tenderId: Types.ObjectId;
+    orgId: Types.ObjectId;
+    formId: Types.ObjectId;
     answers: IAnswer[];
     score?: number;
     createdAt: Date;

@@ -28,7 +28,8 @@ export class FormController {
         res.status(httpStatus.OK).send(result)
     })
     updateForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.updateForm(req.params.formId, req.body)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const form = await this.formService.updateForm(req.params.formId, req.body, req.user)
         res.status(httpStatus.OK).send(form)
     })
     deleteForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -43,17 +44,22 @@ export class FormController {
      * ----------------------------------------------------------------------------------------------------
      */
     addFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.addFormFields(req.params.formId, req.body.fields)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const form = await this.formService.addFormFields(req.params.formId, req.body.fields, req.user)
         res.status(httpStatus.OK).send(form)
     }
     )
 
     updateFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.updateFormFields(req.params.formId, req.body.fields)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+
+        const form = await this.formService.updateFormFields(req.params.formId, req.body.fields, req.user)
         res.status(httpStatus.OK).send(form)
     })
     deleteFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.deleteFormFields(req.params.formId, req.body.fields)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+
+        const form = await this.formService.deleteFormFields(req.params.formId, req.body.fields, req.user)
         res.status(httpStatus.OK).send(form)
     })
 }

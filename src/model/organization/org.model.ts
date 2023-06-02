@@ -1,4 +1,4 @@
-import { Model, Document } from "mongoose";
+import { Model, Document, Types } from "mongoose";
 import { QueryResult } from "../../utils";
 import { NewLicense } from "../license";
 import { NewCertificate, UpdateCertificateBody } from "../certificate";
@@ -7,7 +7,7 @@ import { ORG_SECTOR_TYPE, ORG_TYPE } from './org.type'
 import { ORG_STATUS } from './org.status'
 
 export interface IOrganization {
-    owner: string;
+    owner: Types.ObjectId;
     name: string;
     type: ORG_TYPE;
     tinNo: string;
@@ -18,6 +18,7 @@ export interface IOrganization {
     certificates: NewCertificate[];
     address: NewAddress;
     rating: Number;
+    tenderInvitations?: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -25,7 +26,7 @@ export interface IOrganization {
 export interface IOrganizationDoc extends IOrganization, Document {
 
 }
-export type NewOrgValidator = Omit<IOrganization, | 'rating' | 'createdAt' | 'updatedAt' | 'owner' | 'status'>
+export type NewOrgValidator = Omit<IOrganization, | 'rating' | 'createdAt' | 'updatedAt' | 'owner' | 'status'| 'tenderInvitations'>
 export type NewOrgInput = Omit<IOrganization, | 'rating' | 'createdAt' | 'updatedAt'>
 
 export type UpdateOrgBody = Partial<Omit<IOrganization, 'license' | 'certificates' | 'address'>> & Partial<{
