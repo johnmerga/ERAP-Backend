@@ -14,26 +14,33 @@ export class NotificationRouter {
   }
 
   public routes(): Router {
-    // create organization
+    // create notification
     this.router
       .route("/")
       .post(
         validate(notificationValidator.createNotification),
         this.notificationController.createNotification
       );
-    // get organizations
+    // get notifications
     this.router
       .route("/")
       .get(
         validate(notificationValidator.getNotifications),
         this.notificationController.getNotifications
       );
-    // get organization by id
+    // get notification by id
     this.router
       .route("/:notificationId")
       .get(
         validate(notificationValidator.getNotification),
         this.notificationController.getNotification
+      );
+    // update notification by id
+    this.router
+      .route("/:notificationId")
+      .patch(
+        validate(notificationValidator.updateNotification),
+        this.notificationController.updateNotification
       );
     return this.router;
   }

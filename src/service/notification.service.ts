@@ -5,6 +5,7 @@ import {
   Notification,
   INotificationDoc,
   NewNotification,
+  UpdateNotificationBody,
 } from "../model/notification";
 import { IOptions, QueryResult } from "../utils";
 
@@ -37,4 +38,7 @@ export class NotificationService {
     const notifications = await Notification.paginate(filter, options);
     return notifications;
   }
+  async updateNotification(notificationId: string, update: UpdateNotificationBody): Promise<INotificationDoc> {
+    return await this.notificationDal.updateNotification(notificationId, update)
+}
 }

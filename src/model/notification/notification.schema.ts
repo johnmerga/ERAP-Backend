@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { INotification, NotificationModel } from "./notification.model";
-import { toJSON } from "../../utils";
+import { toJSON, paginate } from "../../utils";
 import { NOTIFICATION_TYPE } from "./notification.type";
 
 export const NotificationSchema = new Schema<INotification, NotificationModel>({
@@ -9,6 +9,10 @@ export const NotificationSchema = new Schema<INotification, NotificationModel>({
     ref: "User",
   },
   title: {
+    type: String,
+    required: true,
+  },
+  text: {
     type: String,
     required: true,
   },
@@ -32,6 +36,7 @@ export const NotificationSchema = new Schema<INotification, NotificationModel>({
 });
 
 NotificationSchema.plugin(toJSON);
+NotificationSchema.plugin(paginate);
 
 export const Notification = model<INotification, NotificationModel>(
   "Notification",

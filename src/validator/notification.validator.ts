@@ -7,8 +7,11 @@ import { NewNotificationInputValidator, NOTIFICATION_TYPE } from "../model/notif
 const notificationBody: Record<keyof NewNotificationInputValidator, any> = {
     userId: joi.custom(objectId),
     title: joi.string().lowercase().custom(capitalizeFirstLetter).trim(),
+    text: joi.string(),
     type: joi.string().valid(...Object.values(NOTIFICATION_TYPE)).insensitive().trim(),
 }
+
+const { ...otherNotificationBody } = notificationBody
 
 export const createNotification = {
     body: joi.object().keys(notificationBody).options({ presence: 'required' })
@@ -28,4 +31,16 @@ export const getNotification = {
     params: Joi.object().keys({
         notificationId: Joi.string().custom(objectId),
     }),
+};
+
+export const updateNotification = {
+    params: Joi.object().keys({
+        notificationId: Joi.required().custom(objectId),
+    }),
+    body: Joi.object()
+        .keys({
+            ...otherNotificationBody,
+            read: joi.boolean(),
+        })
+        .min(1),
 };

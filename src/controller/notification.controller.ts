@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { NotificationService } from "../service";
 import { catchAsync, pick } from "../utils";
 import httpStatus from "http-status";
-import mongoose from "mongoose";
 
 export class NotificationController {
   private notificationService: NotificationService;
@@ -33,4 +32,10 @@ export class NotificationController {
       res.status(httpStatus.OK).send(result);
     }
   );
+  public updateNotification = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    if (typeof req.params.notificationId === 'string') {
+        const notification = await this.notificationService.updateNotification(req.params.notificationId, req.body);
+        res.send(notification);
+    }
+});
 }
