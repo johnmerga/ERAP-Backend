@@ -50,7 +50,7 @@ class App {
         // chapa payment routes
         this.app.use('/api/v1/payment', new PaymentRouter().routes());
         // notification routes
-        // this.app.use('/api/v1/notification', new NotificationRouter().routes())
+        this.app.use('/api/v1/notification', new NotificationRouter().routes())
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {

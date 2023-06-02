@@ -33,4 +33,13 @@ export class NotificationDal {
       );
     }
   }
+
+  async getNotifications(): Promise<INotificationDoc[]> {
+    try {
+        const notifications = await Notification.find()
+        return notifications
+    } catch (error) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while fetching notifications')
+    }
+}
 }

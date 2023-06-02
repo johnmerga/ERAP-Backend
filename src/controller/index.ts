@@ -5,3 +5,4 @@ export * from './form.controller';
 export * from './tender.controller';
 export * from './applicant.controller';
 export * from './payment.controller';
+export * from "./notification.controller";
