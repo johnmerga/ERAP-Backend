@@ -35,10 +35,17 @@ export class NotificationService {
     filter: Record<string, any>,
     options: IOptions
   ): Promise<QueryResult> {
+    options = {...options,sortBy: "createdAt:desc"}
     const notifications = await Notification.paginate(filter, options);
     return notifications;
   }
-  async updateNotification(notificationId: string, update: UpdateNotificationBody): Promise<INotificationDoc> {
-    return await this.notificationDal.updateNotification(notificationId, update)
-}
+  async updateNotification(
+    notificationId: string,
+    update: UpdateNotificationBody
+  ): Promise<INotificationDoc> {
+    return await this.notificationDal.updateNotification(
+      notificationId,
+      update
+    );
+  }
 }

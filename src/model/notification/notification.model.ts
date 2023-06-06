@@ -8,6 +8,7 @@ export interface INotification {
   text: string;
   type: NOTIFICATION_TYPE;
   read: boolean;
+  new: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,7 +16,7 @@ export interface INotification {
 export interface INotificationDoc extends INotification, Document {}
 
 export type NewNotification = Omit<INotification, "createdAt" | "updatedAt">;
-export type NewNotificationInputValidator = Omit<NewNotification, 'read'>;
+export type NewNotificationInputValidator = Omit<NewNotification, 'read' | 'new'>;
 export type UpdateNotificationBody = Partial<INotification>;
 
 export interface NotificationModel extends Model<INotificationDoc> {

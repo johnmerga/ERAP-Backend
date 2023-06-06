@@ -21,9 +21,12 @@ export const getNotifications = {
     query: Joi.object().keys({
         userId: notificationBody.userId,
         title: notificationBody.title,
+        text: notificationBody.text,
         type: notificationBody.type,
         read: joi.boolean(),
+        new: joi.boolean(),
         limit: Joi.number().integer(),
+        sortBy: Joi.string(),
     })
 }
 
@@ -41,6 +44,7 @@ export const updateNotification = {
         .keys({
             ...otherNotificationBody,
             read: joi.boolean(),
+            new: joi.boolean(),
         })
         .min(1),
 };

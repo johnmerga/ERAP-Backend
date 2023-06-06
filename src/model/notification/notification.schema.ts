@@ -25,6 +25,10 @@ export const NotificationSchema = new Schema<INotification, NotificationModel>({
     type: Boolean,
     default: false,
   },
+  new: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
