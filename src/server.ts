@@ -5,9 +5,16 @@ import app from "./app";
 
 import events from "events"
 import http from "http"
+import { Server } from "socket.io"
+import socketIo from "./socketio";
 
 let server = http.createServer(app);
+const io = new Server(server,  {
+    transports: ['polling'],
+    cors: { origin: ["http://localhost:3000","http://localhost:3001"],methods: ["GET", "POST"] },
+  })
 
+socketIo(io)
 
 const workflow = new events.EventEmitter();
 

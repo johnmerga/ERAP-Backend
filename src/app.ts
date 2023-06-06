@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { unless } from 'express-unless';
 import { morganMiddleware } from './logger';
-import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, PaymentRouter, PermissionRouter, SubmissionRouter } from './router';
+import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, PaymentRouter, PermissionRouter, SubmissionRouter, NotificationRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
@@ -49,6 +49,8 @@ class App {
         this.app.use('/api/v1/submissions', new SubmissionRouter().routes());
         // chapa payment routes
         this.app.use('/api/v1/payment', new PaymentRouter().routes());
+        // notification routes
+        this.app.use('/api/v1/notification', new NotificationRouter().routes())
         // permission routes
         this.app.use('/api/v1/permissions', new PermissionRouter().routes());
 
