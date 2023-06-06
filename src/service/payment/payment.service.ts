@@ -2,13 +2,15 @@ import { randomUUID, } from "crypto";
 import { PaymentDal, } from "../../dal";
 import { IPaymentInfo, IPaymentInfoDoc, NewPaymentInputType, NewPaymentInputTypeFormatter, PaymentParams, SuccessPaymentResponse } from "../../model/payment/payment.model";
 import { IChapaPaymentInitiation, PaymentInfo, PaymentStatus } from "../../model/payment";
-import { chapaService, TenderService, ApplicantService, FormService } from "../../service";
+import { chapaService, TenderService, ApplicantService, FormService, OrgService } from "../../service";
 import { IUserDoc } from "../../model/user";
 import { ApiError } from "../../errors";
 import httpStatus from "http-status";
 import { Logger } from "../../logger";
 import { IOptions, QueryResult } from "../../utils";
 import { NewApplicant } from "../../model/applicants";
+import { TenderStatus, TenderType } from "../../model/tender";
+import mongoose from "mongoose";
 
 
 export class PaymentService {
@@ -17,12 +19,14 @@ export class PaymentService {
     private formService: FormService;
     private tenderService: TenderService;
     private applicantService: ApplicantService;
+    private orgService: OrgService
     constructor() {
         this.chapaService = new chapaService();
         this.paymentDal = new PaymentDal();
         this.tenderService = new TenderService();
         this.applicantService = new ApplicantService();
         this.formService = new FormService();
+        this.orgService = new OrgService()
     }
     // format the payment body
     async formatPaymentBody(paymentInfo: NewPaymentInputTypeFormatter): Promise<PaymentParams> {
@@ -47,18 +51,49 @@ export class PaymentService {
     async payWithChapa(inputData: NewPaymentInputType, user: IUserDoc): Promise<SuccessPaymentResponse> {
         try {
             if (!user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, 'User does not have an organization');
-            const tender = await this.tenderService.getTenderById(inputData.tenderId);
+            const tender = (await this.tenderService.getTenderById(inputData.tenderId.toString(), user))
+            const org = await this.orgService.findOrgById(user.orgId.toString())
+            if (org.status !== 'VERIFIED') throw new ApiError(httpStatus.BAD_REQUEST, `payment can't proceed because your organization is not verified`)
+            if (tender.type === TenderType.INVITATION) {
+                throw new ApiError(httpStatus.BAD_REQUEST, 'You can not apply for an invitation tender')
+                // const applicant = await this.applicantService.getOneByOrgIdAndTenderId(user.orgId, new mongoose.Types.ObjectId(inputData.tenderId))
+                // if (!applicant) throw new ApiError(httpStatus.BAD_REQUEST, 'You are not invited for this tender')
+                // const queryFormByTenderId = await this.formService.queryForms({ tenderId: tender.id }, {})
+                // if (queryFormByTenderId.totalResults === 0) throw new ApiError(httpStatus.BAD_REQUEST, `No form found for this tender: ${tender.id}`)
+                // const input = await this.formatPaymentBody({
+                //     ...inputData,
+                //     orgId: applicant.orgId,
+                //     amount: tender.price
+                // });
+                // const inputForChapa: IChapaPaymentInitiation = {
+                //     first_name: input.payerInfo.first_name,
+                //     last_name: input.payerInfo.last_name,
+                //     email: input.payerInfo.email,
+                //     amount: input.amount,
+                //     return_url: input.return_url,
+                //     tx_ref: input.tx_ref
+                // }
+                // Logger.debug(inputForChapa)
+                // const chapaResponse = await this.chapaService.paymentInitiation(inputForChapa);
+                // const paymentInfo = (await this.paymentDal.create(input))
+                // if (!chapaResponse.data?.checkout_url) throw new ApiError(httpStatus.BAD_REQUEST, 'chapa payment initiation failed')
+                // return {
+                //     paymentInfo: paymentInfo.toJSON(),
+                //     paymentUrl: chapaResponse.data?.checkout_url
+                // }
+            }
+            if (tender.status !== TenderStatus.PUBLISHED) throw new ApiError(httpStatus.BAD_REQUEST, 'Tender is not published yet');
             const queryFormByTenderId = await this.formService.queryForms({ tenderId: tender.id }, {})
             if (queryFormByTenderId.totalResults === 0) {
                 throw new ApiError(httpStatus.BAD_REQUEST, `No form found for this tender: ${tender.id}`)
             }
-            const applicant = await this.applicantService.getByOrgIdAndTenderId(user.orgId.toString(), tender.id)
+            const applicant = await this.applicantService.getByOrgIdAndTenderIdList(user.orgId.toString(), tender.id)
             if (applicant.results.length > 0) {
                 throw new ApiError(httpStatus.BAD_REQUEST, 'You have already applied for this tender')
             }
             const input = await this.formatPaymentBody({
                 ...inputData,
-                orgId: user.orgId.toString(),
+                orgId: user.orgId,
                 amount: tender.price
             });
             const inputForChapa: IChapaPaymentInitiation = {
@@ -91,13 +126,13 @@ export class PaymentService {
             // save to applicants
             const applicantData: NewApplicant = {
                 isApplicationSubmitted: false,
-                orgId: paymentInfo.orgId,
-                tenderId: paymentInfo.tenderId,
+                orgId: new mongoose.Types.ObjectId(paymentInfo.orgId),
+                tenderId: new mongoose.Types.ObjectId(paymentInfo.tenderId),
                 paymentId: paymentInfo.id,
 
             }
             // check if applicant exist
-            const applicant = await this.applicantService.getByOrgIdAndTenderId(paymentInfo.orgId, paymentInfo.tenderId)
+            const applicant = await this.applicantService.getByOrgIdAndTenderIdList(paymentInfo.orgId.toString(), paymentInfo.tenderId.toString())
             if (applicant.totalResults === 0) {
                 await this.applicantService.create(applicantData)
             }

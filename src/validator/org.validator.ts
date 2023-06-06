@@ -110,7 +110,7 @@ export const updateOrgRating = {
         orgId: Joi.required().custom(objectId),
     }),
     body: Joi.object().keys({
-        rating: Joi.number().required().min(0).max(5),
+        rating: Joi.number().required().min(1).max(5),
     }).required()
 }
 

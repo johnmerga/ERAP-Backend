@@ -3,11 +3,10 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { unless } from 'express-unless';
 import { morganMiddleware } from './logger';
-import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, PaymentRouter, NotificationRouter } from './router';
+import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantRouter, PaymentRouter, PermissionRouter, SubmissionRouter, NotificationRouter } from './router';
 
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
-import { SubmissionRouter } from './router/submission.router';
 import { authenticateMiddleware } from './service/auth';
 
 const auth = (authenticateMiddleware as any)
@@ -15,6 +14,7 @@ auth.unless = unless
 const path = [
     '/api/v1/auth/login',
     '/api/v1/auth/register',
+    '/api/v1/auth/send-verification-email',
     '/api/v1/auth/verify-email',
     '/api/v1/auth/forgot-password',
     '/api/v1/auth/reset-password',
@@ -51,6 +51,8 @@ class App {
         this.app.use('/api/v1/payment', new PaymentRouter().routes());
         // notification routes
         this.app.use('/api/v1/notification', new NotificationRouter().routes())
+        // permission routes
+        this.app.use('/api/v1/permissions', new PermissionRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {

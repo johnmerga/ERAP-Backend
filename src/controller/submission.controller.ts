@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { catchAsync, pick } from "../utils";
 import httpStatus from "http-status";
 import { SubmissionService } from "../service/submission.service";
+import { ApiError } from "../errors";
 
 export class SubmissionController {
     private submissionService: SubmissionService
@@ -9,11 +10,13 @@ export class SubmissionController {
         this.submissionService = new SubmissionService()
     }
     createSubmission = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.create(req.body,req.user!)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const submission = await this.submissionService.create(req.body, req.user)
         res.status(httpStatus.CREATED).send(submission)
     }
     )
     getSubmission = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
         const submission = await this.submissionService.findSubmission(req.params.submissionId)
         res.status(httpStatus.OK).send(submission)
     }
@@ -27,13 +30,15 @@ export class SubmissionController {
     )
 
     updateSubmission = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.updateSubmission(req.params.submissionId, req.body)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const submission = await this.submissionService.updateSubmission(req.params.submissionId, req.body, req.user)
         res.status(httpStatus.OK).send(submission)
     }
     )
     // give mark
     giveMark = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.giveMark(req.params.submissionId, req.body.marks)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const submission = await this.submissionService.giveMark(req.params.submissionId, req.body.marks, req.user)
         res.status(httpStatus.OK).send(submission)
     })
     deleteSubmission = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -56,18 +61,21 @@ export class SubmissionController {
 
     // add submission answers
     addAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.addAnswers(req.params.submissionId, req.body.answers)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const submission = await this.submissionService.addAnswers(req.params.submissionId, req.body.answers, req.user)
         res.status(httpStatus.OK).send(submission)
     }
     )
     // update submission answers
     updateAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.updateAnswers(req.params.submissionId, req.body.answers)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const submission = await this.submissionService.updateAnswers(req.params.submissionId, req.body.answers, req.user)
         res.status(httpStatus.OK).send(submission)
     })
     // delete submission answers
     deleteAnswers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const submission = await this.submissionService.deleteAnswers(req.params.submissionId, req.body.answers)
+        if(!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const submission = await this.submissionService.deleteAnswers(req.params.submissionId, req.body.answers,req.user)
         res.status(httpStatus.OK).send(submission)
     })
 

@@ -3,6 +3,7 @@ import { FormService } from "../service";
 import { catchAsync, pick } from "../utils";
 import httpStatus from "http-status";
 import mongoose from "mongoose";
+import { ApiError } from "../errors";
 
 export class FormController {
     private formService: FormService
@@ -10,9 +11,10 @@ export class FormController {
         this.formService = new FormService()
     }
     createForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-
+        // check if it has an organization id and if the user exists
+        if (!req.user || !req.user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, `user does not have an organization id or user does not exist`)
         req.body.bidId = new mongoose.Types.ObjectId()  // <--only for testing, this should be deleted later
-        const form = await this.formService.createForm(req.body)
+        const form = await this.formService.createForm(req.body, req.user)
         res.status(httpStatus.CREATED).send(form)
     })
     getForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -26,7 +28,8 @@ export class FormController {
         res.status(httpStatus.OK).send(result)
     })
     updateForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.updateForm(req.params.formId, req.body)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const form = await this.formService.updateForm(req.params.formId, req.body, req.user)
         res.status(httpStatus.OK).send(form)
     })
     deleteForm = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -41,17 +44,22 @@ export class FormController {
      * ----------------------------------------------------------------------------------------------------
      */
     addFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.addFormFields(req.params.formId, req.body.fields)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+        const form = await this.formService.addFormFields(req.params.formId, req.body.fields, req.user)
         res.status(httpStatus.OK).send(form)
     }
     )
 
     updateFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.updateFormFields(req.params.formId, req.body.fields)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+
+        const form = await this.formService.updateFormFields(req.params.formId, req.body.fields, req.user)
         res.status(httpStatus.OK).send(form)
     })
     deleteFormFields = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const form = await this.formService.deleteFormFields(req.params.formId, req.body.fields)
+        if (!req.user) throw new ApiError(httpStatus.BAD_REQUEST, 'you have to be logged in to access this route')
+
+        const form = await this.formService.deleteFormFields(req.params.formId, req.body.fields, req.user)
         res.status(httpStatus.OK).send(form)
     })
 }

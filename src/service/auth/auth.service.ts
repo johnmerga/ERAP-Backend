@@ -4,6 +4,7 @@ import { TokenService } from "../token.service";
 import { TokenType } from "../../model/token";
 import { ApiError } from "../../errors";
 import httpStatus from "http-status";
+import {  VerifyUserAndOrgId } from "../../model/user/user.model";
 
 
 export class AuthService {
@@ -76,11 +77,11 @@ export class AuthService {
             type: TokenType.VERIFY_EMAIL,
             user: user.id
         })
-
-        const updateUser = await this.userService.updateUserById(user.id, {
+        const updateStatus: VerifyUserAndOrgId = {
             isVerified: true,
             status: USER_STATUS.ACTIVE
-        })
+        }
+        const updateUser = await this.userService.updateUserStatus(user.id, updateStatus)
         return updateUser
     }
 

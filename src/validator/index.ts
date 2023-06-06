@@ -22,3 +22,5 @@ export * as submissionValidator from "./submission.validator"
 export * as paymentValidator from './payment.validator';
 // notification validator
 export * as notificationValidator from './notification.validator';
+// permission validator
+export * as permissionValidator from './permission.validator';

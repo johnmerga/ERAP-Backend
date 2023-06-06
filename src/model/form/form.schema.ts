@@ -54,7 +54,7 @@ const formSchema = new Schema<IFormDoc, IFormModel>({
     },
     tenderId: {
         type: Schema.Types.ObjectId,
-        ref: "Bid",
+        ref: 'Tender',
         required: true,
     },
     type: {

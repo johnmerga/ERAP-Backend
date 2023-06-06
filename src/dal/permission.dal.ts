@@ -25,9 +25,9 @@ export class PermissionDal {
         }
     }
     // find all permissions
-    async findPermissions(filter: Record<string, any>): Promise<IPermissionDoc[]> {
+    async findPermissions(filter: Record<string, any>, project?: Record<any, any>): Promise<IPermissionDoc[]> {
         try {
-            const foundPermissions = await Permission.find(filter)
+            const foundPermissions = await Permission.find(filter, project ? project : {})
             if (!foundPermissions) throw new ApiError(httpStatus.BAD_REQUEST, "No permissions found")
             return foundPermissions
         } catch (error) {
