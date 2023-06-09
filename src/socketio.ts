@@ -2,8 +2,12 @@ import { Server, Socket } from "socket.io";
 import { OrgService } from "./service/org.service";
 import { NotificationService } from "./service";
 import { getOrg } from "./validator/org.validator";
-import { createNotification } from "./validator/notification.validator";
-import { NewNotification } from "./model/notification";
+import {
+  createNotification,
+  updateNotification,
+  getNotification,
+} from "./validator/notification.validator";
+import { NewNotification, UpdateNotificationBody } from "./model/notification";
 import { Logger } from "./logger";
 
 type OrgIo = {
@@ -43,6 +47,27 @@ export default function socketIo(io: Server) {
         );
       }
     });
+
+    socket.on(
+      "updateNotification",
+      async (notId: string, not: UpdateNotificationBody) => {
+        const invalidNot = updateNotification.body.validate(not).error;
+        const invalidId = getNotification.params.validate({ notificationId: notId })
+          .error;
+        if (!invalidNot && !invalidId) {
+          const notificationService = new NotificationService();
+          await notificationService.updateNotification(notId, not);
+          const notifications = await notificationService.queryNotifications(
+            { orgId: not.orgId },
+            {}
+          );
+          orgsio.orgId?.emit(
+            "notificationsLength",
+            notifications.totalResults || 0
+          );
+        }
+      }
+    );
 
     socket.on("getNotificationsLength", async (orgId) => {
       const notificationService = new NotificationService();
