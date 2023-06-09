@@ -26,7 +26,7 @@ export class NotificationController {
   );
   getNotifications = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-      const filter = pick(req.query, ["userId","type","title","read"]);
+      const filter = pick(req.query, ["orgId","type","title","read"]);
       const options = pick(req.query, ["sortBy", "limit", "page", "populate"]);
       const result = await this.notificationService.queryNotifications(filter, options);
       res.status(httpStatus.OK).send(result);

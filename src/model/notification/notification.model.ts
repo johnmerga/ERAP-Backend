@@ -3,7 +3,7 @@ import { QueryResult } from "../../utils";
 import { NOTIFICATION_TYPE } from "./notification.type";
 
 export interface INotification {
-  userId: mongoose.Types.ObjectId;
+  orgId: mongoose.Types.ObjectId;
   title: string;
   text: string;
   type: NOTIFICATION_TYPE;

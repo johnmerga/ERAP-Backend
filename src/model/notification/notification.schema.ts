@@ -4,9 +4,10 @@ import { toJSON, paginate } from "../../utils";
 import { NOTIFICATION_TYPE } from "./notification.type";
 
 export const NotificationSchema = new Schema<INotification, NotificationModel>({
-  userId: {
+  orgId: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Organization",
+    required: true,
   },
   title: {
     type: String,
