@@ -229,7 +229,7 @@ export class SubmissionService {
             const submissionAnswers = submission.answers
             const formQuestions = form.fields
             const populatedAnswers = submissionAnswers.map((answer) => {
-                const question = formQuestions.find((question) => {
+                const question = formQuestions?.find((question) => {
                     let hydratedQuestion = question as IFormFieldsDoc
                     hydratedQuestion = hydratedQuestion.toObject()
                     return hydratedQuestion._id == answer.questionId ? answer : null
