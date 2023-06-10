@@ -11,26 +11,44 @@ export interface IFormFields {
     required: boolean,
 
 }
-
 export interface IFormFieldsDoc extends IFormFields, Document {
     id: string,
 }
 export interface IFormFieldsModel extends Model<IFormFieldsDoc> { }
-export interface IFormTable {
-    row: string[],
-    column: string[],
+/** 
+ * for financial form table
+ */
+
+// form table column
+export interface ITableColumn {
+    name: string;
+    type: 'string' | 'number' | 'boolean';
 }
-export interface IFormTableDoc extends IFormTable, Document { }
-export interface IFormTableModel extends Model<IFormTableDoc> { }
+export interface ITableColumnDoc extends ITableColumn, Document { }
+export interface ITableColumnModel extends mongoose.Model<ITableColumnDoc> { }
+export interface ITableData {
+    [key: string]: string | number | boolean;
+}
+// form table row
+export interface ITable {
+    columns: ITableColumn[];
+    rows: Record<string, ITableData>;
+}
+export interface ITableDoc extends ITable, Document { }
+export interface ITableModel extends mongoose.Model<ITableDoc> { }
+
+
+/**
+ * ^^^^^^^^^^^^^^^^^^ table^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ */
 export interface IForm {
     title: string,
     description: string,
     tenderId: mongoose.Types.ObjectId,
     type: FormType,
-    fields: IFormFields[],
-    table?: IFormTable[],
+    fields?: IFormFields[],
+    table?: ITable,
 }
-
 export interface IFormDoc extends IForm, Document {
 }
 

@@ -5,8 +5,10 @@ import { Form, IFormDoc, IFormFields, NewForm, NewFormFields, UpdateFormBody } f
 import { IOptions, Operation, QueryResult, checkIdsInSubDocs, } from "../utils";
 import { ApplicantService, TenderService } from "../service/";
 import { IUserDoc } from "../model/user";
-import { IPaymentInfoDoc, PaymentStatus } from "../model/payment";
+import { IPaymentInfo, IPaymentInfoDoc, PaymentInfo, PaymentStatus } from "../model/payment";
 import { ITenderDoc, TenderType } from "../model/tender";
+import { Applicant, NewApplicant } from "../model/applicants";
+import mongoose from "mongoose";
 export class FormService {
     private formDal: FormDal
     private tenderService: TenderService
@@ -52,6 +54,38 @@ export class FormService {
             throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: error occured while getting a form with id: [${formId}] `)
         }
     }
+    async getBoughtTenderForms(filter: Record<string, any>, options: IOptions, user: IUserDoc) {
+        try {
+            const payedTenderList = await PaymentInfo.paginate(
+                {
+                    orgId: user.orgId,
+                    paymentStatus: PaymentStatus.Success
+                }, {}
+            ) as QueryResult
+            const tenderIds: mongoose.Types.ObjectId[] = []
+            if (payedTenderList.results.length > 0) {
+                const paymentInfoLists = payedTenderList.results as unknown as IPaymentInfo[]
+                const payedTenderIds = paymentInfoLists.map((paymentInfo) => paymentInfo.tenderId)
+                tenderIds.push(...payedTenderIds)
+            }
+            // checking from applicant list incase if the tender is an invitation tender
+            const applicantList = await Applicant.paginate({ orgId: user.orgId, }, {}) as QueryResult
+            if (applicantList.results.length > 0) {
+                const tenderIdsFromInvitation = (applicantList.results as unknown as NewApplicant[]).map(applicant => applicant.tenderId)
+                tenderIds.push(...tenderIdsFromInvitation)
+
+            }
+            const formFilter = {
+                ...filter,
+                tenderId: filter.tenderId ? filter.tenderId : { $in: tenderIds },
+            }
+            return await Form.paginate(formFilter, options)
+
+        } catch (error) {
+            if (error instanceof ApiError) throw error
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: error occured while getting a form with organization id: [${user.orgId}] `)
+        }
+    }
     async queryForms(filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
         try {
             return await Form.paginate(filter, options)
@@ -64,7 +98,7 @@ export class FormService {
         try {
             // auth check
             const form = await (await this.formDal.getForm(formId)).populate('tenderId')
-            if(!form || typeof form.tenderId === 'string' ) throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
+            if (!form || typeof form.tenderId === 'string') throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
             const tender = form.tenderId as unknown as ITenderDoc
             if (!tender || tender.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, `you are not allowed to update this form because you are not the owner of this tender`)
             const { fields, ...otherFields } = update
@@ -93,7 +127,7 @@ export class FormService {
             // await this.formDal.getForm(formId)
             // auth check
             const autForm = await (await this.formDal.getForm(formId)).populate('tenderId')
-            if(!autForm || typeof autForm.tenderId === 'string' ) throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
+            if (!autForm || typeof autForm.tenderId === 'string') throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
             const tender = autForm.tenderId as unknown as ITenderDoc
             if (!tender || tender.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, `you are not allowed to update this form because you are not the owner of this tender`)
 
@@ -112,7 +146,7 @@ export class FormService {
         try {
             // auth check
             const autForm = await (await this.formDal.getForm(formId)).populate('tenderId')
-            if(!autForm || typeof autForm.tenderId === 'string' ) throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
+            if (!autForm || typeof autForm.tenderId === 'string') throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
             const tender = autForm.tenderId as unknown as ITenderDoc
             if (!tender || tender.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, `you are not allowed to update this form because you are not the owner of this tender`)
 
@@ -132,7 +166,7 @@ export class FormService {
         try {
             // auth check
             const authForm = await (await this.formDal.getForm(formId)).populate('tenderId')
-            if(!authForm || typeof authForm.tenderId === 'string' ) throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
+            if (!authForm || typeof authForm.tenderId === 'string') throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: failed to get tender id from form`)
             const tender = authForm.tenderId as unknown as ITenderDoc
             if (!tender || tender.orgId.toString() !== user.orgId.toString()) throw new ApiError(httpStatus.FORBIDDEN, `you are not allowed to update this form because you are not the owner of this tender`)
 

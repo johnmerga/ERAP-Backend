@@ -21,6 +21,13 @@ export class FormController {
         const form = await this.formService.getForm(req.params.formId, req.user!)
         res.status(httpStatus.OK).send(form)
     })
+    getBoughtTenderForms = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.user || !req.user.orgId) throw new ApiError(httpStatus.BAD_REQUEST, `user does not have an organization id or user does not exist`)
+        const filter = pick(req.query, ['type', 'tenderId'])
+        const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate'])
+        const result = await this.formService.getBoughtTenderForms(filter, options, req.user)
+        res.status(httpStatus.OK).send(result)
+    })
     queryForms = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const filter = pick(req.query, ['type', 'tenderId'])
         const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate'])

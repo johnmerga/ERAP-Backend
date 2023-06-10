@@ -2,6 +2,7 @@ import { Form, NewForm, UpdateFormBody, IFormDoc } from "../model/form";
 import { ApiError } from "../errors";
 import httpStatus from "http-status";
 import { Operation, updateSubDocuments } from "../utils";
+import { Error as mongooseError } from "mongoose";
 
 export class FormDal {
 
@@ -9,8 +10,11 @@ export class FormDal {
         try {
             const newForm = await new Form(form).save()
             return newForm
-        } catch (error) {
-            throw new Error('error occurred while creating form ')
+        } catch (error: unknown) {
+            if (error instanceof mongooseError.ValidationError) {
+                throw new ApiError(httpStatus.BAD_REQUEST, error.message)
+            }
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'something went wrong while creating form')
         }
 
     }

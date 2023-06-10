@@ -1,6 +1,80 @@
 import joi from "joi";
 import { objectId } from "./custom";
-import { NewForm, FormQuestionType, FormType, IFormFields } from "../model/form"
+import { NewForm, FormQuestionType, FormType, IFormFields, ITable } from "../model/form"
+
+/**
+ * ------------------------------------------table validation------------------------------------------
+ */
+
+const tableBody: Record<keyof ITable, any> = {
+    columns: joi
+        .array()
+        .items(
+            joi.object().keys({
+                name: joi.string().trim().required(),
+                type: joi.string().valid('string', 'number', 'boolean').insensitive().required(),
+            })
+        )
+        .options({ presence: 'required' })
+        .required(),
+    rows: joi
+        .object()
+        .pattern(
+            joi.string().required().trim(),
+            joi
+                .object()
+                .pattern(
+                    joi.string().required().trim(),
+                    joi.any().required()
+                )
+                .custom((value, helpers) => {
+                    const columns = helpers.state.ancestors[1]['columns'] as any[]
+                    const columnLength = columns.length;
+
+                    const valueKeys = Object.keys(value);
+                    const valueKeysLength = valueKeys.length;
+
+                    if (valueKeysLength !== columnLength) {
+                        return helpers.error('object.length', { columnLength });
+                    }
+
+                    return value;
+                })
+                .required()
+        ).options({ presence: 'required' })
+        .custom((value, helpers) => {
+            // console.log(`"""""""""""""""""""""""""""""""""""""`)
+            const columns = helpers.state.ancestors[0]['columns']
+            const rows = helpers.state.ancestors[0]['rows']
+            const columnNames = columns.map((column: any) => column.name)
+            // const rowNames = Object.keys(rows)
+            const rowValues = Object.values(rows) as Record<string, any>[]
+            // checking if the for each row the column names are the same as the column names in the table
+            for (const row of rowValues) {
+                const rowKeys = Object.keys(row)
+                if (rowKeys.length !== columnNames.length) {
+                    return helpers.error('object.length', { columnLength: columnNames.length });
+                }
+                for (const key of rowKeys) {
+                    if (!columnNames.includes(key)) {
+                        return helpers.error('object.length', { columnLength: columnNames.length });
+                    }
+                }
+            }
+            // console.log(columnNames);
+            // console.log(rowValues);
+            // console.log(`"""""""""""""""""""""""""""""""""""""`)
+
+            return value
+        }).options({ presence: 'required' })
+        .required(),
+};
+
+
+
+/**
+ * ----------------------------------------------------------------------------------------------------
+ */
 
 // a single question validation
 const formQuestionBody: Record<keyof IFormFields, any> = {
@@ -23,10 +97,7 @@ const formBody: Record<keyof NewForm, any> = {
     title: joi.string().trim(),
     type: joi.string().valid(...Object.values(FormType)).insensitive(),
     fields: joi.array().items(formQuestionBody),
-    table: joi.array().items(joi.object().keys({
-        row: joi.array().items(joi.string().trim()).required(),
-        column: joi.array().items(joi.string().trim()).required(),
-    })).optional(),
+    table: joi.object().keys(tableBody),
 }
 
 const { fields, ...otherFormBody } = formBody
@@ -36,12 +107,24 @@ const { id, ...otherFormQuestionBody } = formQuestionBody
 export const createForm = {
     body: joi.object().keys({
         ...otherFormBody,
-        fields: joi.array().items(
-            joi.object().keys(otherFormQuestionBody).options({ presence: 'required' })
-        ).required(),
-
-    }).options({ presence: 'required' })
+        table: joi.when('type', {
+            is: FormType.FINANCIAL,
+            then: joi.object().keys(tableBody).required(),
+            otherwise: joi.object().keys(tableBody).forbidden(),
+        }),
+        fields: joi.when('type', {
+            is: FormType.TECHNICAL,
+            then: joi.array().items(joi.object().keys(otherFormQuestionBody).options({ presence: 'required' })).required(),
+            otherwise: joi.forbidden(),
+        }),
+    }).options({
+        presence: 'required',
+    })
 }
+
+
+
+
 
 export const getForm = {
     params: joi.object().keys({

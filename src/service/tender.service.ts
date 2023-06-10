@@ -10,12 +10,6 @@ import { OrgService } from "./org.service";
 import { IOrganizationDoc, ORG_STATUS, Organization } from "../model/organization";
 import { returnComparedObj } from "../utils/compareQuery";
 import mongoose from "mongoose";
-// import { IPaymentInfoDoc, PaymentStatus } from "../model/payment";
-
-// to be deleted later
-// import { Logger } from "../logger";
-// import * as db from "../db";
-
 
 export class TenderService {
     private tenderDal: TenderDal;
@@ -35,10 +29,8 @@ export class TenderService {
             applicants: [],
         })
     }
-    // : Promise<{ statusCode: number, message: string, data: {} | null }>
     async inviteTender(tenderID: string, orgIds: string[], owner: IUserDoc) {
         try {
-            // await db.connect()
             const tenderId = new mongoose.Types.ObjectId(tenderID)
             const tender = await this.getTenderById(tenderId.toString(), owner)
             if (tender.orgId.toString() !== owner.orgId.toString()) throw new ApiError(httpStatus.BAD_REQUEST, 'You can not invite for a tender that is not yours')
@@ -46,11 +38,7 @@ export class TenderService {
             const listOfOrgIds = orgIds.map(org => new mongoose.Types.ObjectId(org))
             // check if the orgs are verified and exist
             const verifiedOrgs = await Organization.find({ _id: { $in: listOfOrgIds }, status: ORG_STATUS.VERIFIED })
-            //@ts-ignore
             const verifiedOrgsIds = verifiedOrgs.map(org => org._id)
-            //@ts-ignore
-            const notVerifiedOrgs = await Organization.find({ _id: { $in: listOfOrgIds }, status: { $ne: ORG_STATUS.VERIFIED } })
-
             const invitedOrg = await Promise.all(verifiedOrgs.map(async org => {
                 const applicant = await Applicant.findOne({
                     tenderId: tenderId,
