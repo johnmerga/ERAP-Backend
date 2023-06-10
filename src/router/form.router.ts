@@ -14,6 +14,8 @@ export class FormRouter {
     public routes() {
         // create form
         this.router.route('/').post(validate(formValidator.createForm), this.formController.createForm);
+        // get forms for bought tenders
+        this.router.route('/boughtTenders').get(validate(formValidator.getForms), this.formController.getBoughtTenderForms);
         // get form by id
         this.router.route('/:formId').get(validate(formValidator.getForm), this.formController.getForm);
         // get all forms
