@@ -24,3 +24,5 @@ export * as paymentValidator from './payment.validator';
 export * as notificationValidator from './notification.validator';
 // permission validator
 export * as permissionValidator from './permission.validator';
+// chat validator
+export * as chatValidator from './chat.validator';

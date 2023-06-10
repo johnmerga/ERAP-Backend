@@ -1,0 +1,4 @@
+export enum CHAT_TYPE {
+    COMPLAINT = 'COMPLAINT',
+    CLARIFICATION = 'CLARIFICATION',
+}
