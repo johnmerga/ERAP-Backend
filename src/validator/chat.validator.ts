@@ -14,6 +14,7 @@ const chatBody: Record<keyof NewChat, any> = {
     supplierOrgId: joi.string().custom(objectId).trim(),
     tenderId: joi.string().custom(objectId).trim(),
     type: joi.string().valid(...Object.values(CHAT_TYPE)).insensitive(),
+    subject: joi.string().trim(),
     messages: joi.array().items(chatMessageBody)
 }
 

@@ -41,6 +41,10 @@ const chatSchema = new Schema<IChatDoc, IChatModel>({
     required: true,
     enum: Object.values(CHAT_TYPE),
   },
+  subject: {
+    type: String,
+    required: true
+  },
   messages: [chatMessageSchema],
   createdAt: {
     type: Date,

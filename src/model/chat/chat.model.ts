@@ -18,6 +18,7 @@ export interface IChat {
   supplierOrgId: mongoose.Types.ObjectId;
   tenderId: mongoose.Types.ObjectId;
   type: CHAT_TYPE;
+  subject: string;
   messages: IChatMessages[];
   createdAt: Date;
   updatedAt: Date;
