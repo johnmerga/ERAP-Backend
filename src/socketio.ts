@@ -21,8 +21,14 @@ export default function socketIo(io: Server) {
     const orgService = new OrgService();
     socket.on("setOrgId", async (orgId: string) => {
       const invalidId = getOrg.params.validate({ orgId: orgId }).error;
+      let org;
       if (orgId && !invalidId) {
-        const org = await orgService.findOrgById(orgId);
+        try {
+          org = await orgService.findOrgById(orgId);
+        } catch (err) {
+          console.log(err)
+        }
+        
         if (org) {
           orgsio.orgId = socket;
           Logger.info(`⚡ Socket: Organization with id ${orgId} connected`);
