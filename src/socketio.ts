@@ -22,21 +22,17 @@ export default function socketIo(io: Server) {
     io.on("connection", (socket: Socket) => {
         const orgService = new OrgService();
         socket.on("setOrgId", async (orgId: string) => {
-            const invalidId = getOrg.params.validate({ orgId: orgId }).error;
-            let org;
-            if (orgId && !invalidId) {
-                try {
-                    org = await orgService.findOrgById(orgId);
-                    orgsIo.orgId = socket;
-                    Logger.debug(`⚡ Socket: Organization with id ${orgId} connected`);
-                } catch (err) {
-                    if (err instanceof ApiError) throw err;
-                    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: error occured finding organization with id ${orgId}`);
-                }
-
+            try {
+                const { error } = getOrg.params.validate({ orgId: orgId })
+                if (error) throw new ApiError(httpStatus.BAD_REQUEST, error.message)
+                await orgService.findOrgById(orgId);
+                orgsIo.orgId = socket;
+                Logger.info(`⚡ Socket: Organization with id ${orgId} connected`);
+            } catch (error) {
+                if (error instanceof ApiError) throw error
+                throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `system error: error occured while creating connection to socket`)
             }
-        });
-
+        })
         socket.on("createNotification", async (not: NewNotification) => {
             const invalidNot = createNotification.body.validate(not).error;
             if (!invalidNot) {
@@ -51,7 +47,7 @@ export default function socketIo(io: Server) {
                     notifications.totalResults || 0
                 );
             }
-        });
+        })
 
         socket.on(
             "updateNotification",
