@@ -43,9 +43,13 @@ const chatSchema = new Schema<IChatDoc, IChatModel>({
   },
   subject: {
     type: String,
-    required: true
+    required: true,
   },
   messages: [chatMessageSchema],
+  new: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -60,5 +64,8 @@ chatMessageSchema.plugin(toJSON);
 chatSchema.plugin(toJSON);
 chatSchema.plugin(paginate);
 
-export const ChatMessages = model<IChatMessagesDoc, IChatMessagesModel>("ChatMessages", chatMessageSchema);
+export const ChatMessages = model<IChatMessagesDoc, IChatMessagesModel>(
+  "ChatMessages",
+  chatMessageSchema
+);
 export const Chat = model<IChatDoc, IChatModel>("Chat", chatSchema);

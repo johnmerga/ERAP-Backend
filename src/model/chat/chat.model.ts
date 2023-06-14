@@ -20,12 +20,14 @@ export interface IChat {
   type: CHAT_TYPE;
   subject: string;
   messages: IChatMessages[];
+  new: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IChatDoc extends IChat, Document {}
 export type NewChat = Omit<IChat, "createdAt" | "updatedAt">;
+export type NewChatInputValidator = Omit<NewChat, 'new'>;
 export type NewChatMessages = Omit<IChatMessages, "id">;
 export type UpdateChatBody = Partial<IChat>;
 

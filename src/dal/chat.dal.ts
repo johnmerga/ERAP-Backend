@@ -41,11 +41,22 @@ export class ChatDal {
 
     async updateChat(chatId: string, update: UpdateChatBody, chatMessageOperation?: Operation): Promise<IChatDoc> {
         try {
-
             const { messages, ...otherMessages } = update
+
+            if (otherMessages.new === false) {
+                const chat = await this.getChat(chatId)
+                chat.set(otherMessages)
+                chat.updatedAt = new Date()
+                await chat.save()
+                return chat
+            }
+
             if (otherMessages && (!messages || !messages[0])) {
                 const chat = await this.getChat(chatId)
-                await chat.set(messages).save()
+                chat.set(messages)
+                chat.updatedAt = new Date()
+                chat.new = true;
+                await chat.save()
                 return chat
             }
 
@@ -61,6 +72,10 @@ export class ChatDal {
                 if (isSubDocSaved instanceof Error) {
                     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, isSubDocSaved.message)
                 }
+                const chat = await this.getChat(chatId);
+                chat.updatedAt = new Date()
+                chat.new = true;
+                await chat.save()
                 return isSubDocSaved
             }
             throw new ApiError(httpStatus.BAD_REQUEST, 'chat not updated: unhanded error')
