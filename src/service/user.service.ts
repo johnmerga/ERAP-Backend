@@ -36,7 +36,21 @@ export class UserService {
 
         return this.userDal.createAdmin(userToBeCreated);
     }
+    /*  */
+    public async registerSystemAdmin(userBody: NewAdmin): Promise<IUserDoc> {
+        // check if email is taken
+        if (await this.isEmailTaken(userBody.email)) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+        }
+        const sysAdminPermissions = await this.permissionService.getPermissionIdsByRole(Role.SysAdmin)
+        const userToBeCreated: NewAdminInput = {
+            ...userBody,
+            roles: [Role.SysAdmin],
+            permissions: [...sysAdminPermissions],
+        }
 
+        return this.userDal.createAdmin(userToBeCreated);
+    }
 
     /* create user */
     public async createUser(userBody: NewUserValidation, owner: IUserDoc): Promise<IUserDoc> {
