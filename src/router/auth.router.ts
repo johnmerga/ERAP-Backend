@@ -16,6 +16,8 @@ export class AuthRouter {
     public routes() {
         // register
         this.router.route('/register').post(validate(authValidator.register), this.authController.register)
+        // register system admin
+        this.router.route('/register-system-admin').post(validate(authValidator.register), this.authController.registerSystemAdmin)
         // login
         this.router.route('/login').post(validate(authValidator.login), this.authController.login)
         //logout

@@ -32,6 +32,16 @@ export class AuthController {
         })
     })
     /*  */
+    public registerSystemAdmin = catchAsync(async (req: Request, res: Response) => {
+        const sysAdmin = await this.userService.registerSystemAdmin(req.body)
+        Logger.info(`user: [${sysAdmin.name}] with email : [${sysAdmin.email}] created`)
+        const tokens = await this.tokenService.generateAccessAndRefreshToken(sysAdmin)
+        res.status(httpStatus.CREATED).send({
+            sysAdmin,
+            tokens
+        })
+    })
+    /*  */
     public login = catchAsync(async (req: Request, res: Response) => {
         const { email, password } = req.body;
         const user = await this.authService.loginWithEmailAndPassword(email, password);

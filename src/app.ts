@@ -14,6 +14,7 @@ auth.unless = unless
 const path = [
     '/api/v1/auth/login',
     '/api/v1/auth/register',
+    '/api/v1/auth/register-system-admin',
     '/api/v1/auth/send-verification-email',
     '/api/v1/auth/verify-email',
     '/api/v1/auth/forgot-password',
