@@ -59,7 +59,7 @@ export class EmailService {
     async sendVerificationEmail(to: string, token: string, name: string): Promise<void> {
         const subject = 'Email Verification';
         // replace this url with the link to the email verification page of your front-end app
-        const verificationEmailUrl = `${config.clientUrl}/api/v1/auth/verify-email?token=${token}`;
+        const verificationEmailUrl = `${config.clientUrl}/verified?token=${token}`;
         const text = `Hi ${name},
         To verify your email, click on this link: ${verificationEmailUrl}
         If you did not create an account, then ignore this email.`;
