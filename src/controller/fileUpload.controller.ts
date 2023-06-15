@@ -10,24 +10,34 @@ export class FileUploadController {
 
     uploadFile = catchAsync(
         async (req: Request, res: Response, next: NextFunction) => {
-            const file = req.file;
-            if (!file) throw new ApiError(httpStatus.BAD_REQUEST, 'file is required');
-            res.status(httpStatus.OK).send(file);
+            try {
+                const file = req.file;
+                if (!file) throw new ApiError(httpStatus.BAD_REQUEST, 'file is required');
+                res.status(httpStatus.OK).send(file);
+            } catch (error) {
+                if (error instanceof ApiError) throw error
+                throw new ApiError(httpStatus.BAD_REQUEST, 'system error while uploading file');
+            }
         }
     );
     getFileByName = catchAsync(
         async (req: Request, res: Response, next: NextFunction) => {
-            const { name } = req.params;
-            if (!name) throw new ApiError(httpStatus.BAD_REQUEST, 'fileName is required');
-            const filePath = `./uploads/${name}`;
-            res.sendFile(filePath, {
-                root: '.',
-                headers: {
-                    'Content-Type': 'image/jpeg',
-                },
-            });
+            try {
+                const { name } = req.params;
+                if (!name) throw new ApiError(httpStatus.BAD_REQUEST, 'fileName is required');
+                const filePath = `./uploads/${name}`;
+                res.sendFile(filePath, {
+                    root: '.',
+                    headers: {
+                        'Content-Type': 'image/jpeg',
+                    },
+                });
+            } catch (error) {
+                if (error instanceof ApiError) throw error;
+                throw new ApiError(httpStatus.BAD_REQUEST, 'system error while getting file');
+            }
         })
-        getFileBase64Format = catchAsync(
+    getFileBase64Format = catchAsync(
         async (req: Request, res: Response, next: NextFunction) => {
             try {
                 const { filename } = req.params;
