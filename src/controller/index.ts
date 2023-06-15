@@ -8,3 +8,4 @@ export * from './payment.controller';
 export * from "./notification.controller";
 export * from './permission.controller';
 export * from './chat.controller';
+export * from './fileUpload.controller'

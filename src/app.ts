@@ -8,6 +8,7 @@ import { UserRouter, AuthRouter, OrgRouter, FormRouter, TenderRouter, ApplicantR
 import { ApiError, errorConverter, errorHandler } from "./errors"
 import httpStatus from 'http-status';
 import { authenticateMiddleware } from './service/auth';
+import { FileUploadRouter } from './router/fileUpload.router';
 
 const auth = (authenticateMiddleware as any)
 auth.unless = unless
@@ -22,6 +23,10 @@ const path = [
     '/api/v1/auth/refresh-token',
     '/api/v1/auth/logout',
     '/api/v1/test',
+    '/api/v1/upload',
+    { url: /^\/api\/v1\/upload\/.*/, methods: ['GET'] },
+    // /api/v1/upload/base64/:filename
+    { url: /^\/api\/v1\/upload\/base64\/.*/, methods: ['GET'] },
     { url: /^\/api\/v1\/payment\/verify\/.*/, methods: ['GET'] },
     { url: '/api/v1/orgs', methods: ['GET'] },
     { url: '/api/v1/tenders', methods: ['GET'] },
@@ -56,6 +61,8 @@ class App {
         this.app.use('/api/v1/permissions', new PermissionRouter().routes());
         // chat routes
         this.app.use('/api/v1/chat', new ChatRouter().routes());
+        // file upload routes
+        this.app.use('/api/v1/upload', new FileUploadRouter().routes());
 
         // unknown route
         this.app.use((req: Request, res: Response, next: NextFunction) => {
