@@ -27,6 +27,8 @@ export const verifyPayment = {
     params: Joi.object().keys({
         // regex example ERAP-264a9851-83 the length and the format should follow this pattern `ERAP-264a9851-83`
         tx_ref: Joi.string().required().trim().regex(/^ERAP-[a-zA-Z0-9]{8}-[a-zA-Z0-9]{2}$/),
+        // check if its a url
+        // callback: Joi.string().uri().trim(),
     }).required(),
 }
 

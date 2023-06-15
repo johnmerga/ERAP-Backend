@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { catchAsync, pick } from '../utils';
 import httpStatus from 'http-status';
 import { ApiError } from "../errors";
+import config from "../config/config";
 
 export class PaymentController {
     private paymentService: PaymentService;
@@ -12,14 +13,21 @@ export class PaymentController {
     //initiate payment
     paymentRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const response = await this.paymentService.payWithChapa(req.body, req.user!);
-        
+
         res.status(httpStatus.OK).send(response);
     });
 
     //verify 
     paymentVerify = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const response = await this.paymentService.verifyChapaPayment(req.params.tx_ref);
-        res.status(httpStatus.OK).send(response);
+        const { tx_ref } = req.params;
+        const response = await this.paymentService.verifyChapaPayment(tx_ref);
+        // redirect to the callback url
+        if (response) {
+            res.redirect(`${config.clientUrl}/Supplier/FormList`)
+            return
+        } else {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'payment verification failed');
+        }
     })
 
     // get payments by orgId

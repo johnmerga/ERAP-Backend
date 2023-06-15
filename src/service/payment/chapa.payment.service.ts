@@ -27,6 +27,7 @@ export class chapaService {
         try {
             if (!paymentInitiation.currency) paymentInitiation.currency = Currency.ETB
             paymentInitiation.callback_url = `${config.baseUrl}/api/v1/payment/verify/${paymentInitiation.tx_ref}`
+            // const encodedURL = encodeURIComponent(paymentInitiation.return_url)
             paymentInitiation.return_url = `${config.baseUrl}/api/v1/payment/verify/${paymentInitiation.tx_ref}`
             const dataToBeSent = {
                 ...paymentInitiation,
