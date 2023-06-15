@@ -49,6 +49,10 @@ const OrganizationSchema = new Schema<IOrganization, OrganizationModel>({
         type: Number,
         default: null,
     },
+    profilePhoto: {
+        type: String,
+        default: null,
+    },
     tenderInvitations: [{
         type: Schema.Types.ObjectId,
         ref: 'Tender',

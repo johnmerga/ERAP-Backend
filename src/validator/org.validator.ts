@@ -42,6 +42,7 @@ export const createOrgBody: Record<keyof NewOrgValidator, any> = {
     capital: joi.number().integer(),
     sector: joi.string().valid(...Object.values(ORG_SECTOR_TYPE)).insensitive().trim(),
     license: joi.object().keys(createLicenseBody),
+    profilePhoto: joi.string(),
     certificates: joi.array().items(joi.object().keys(createCertBody)),
 }
 

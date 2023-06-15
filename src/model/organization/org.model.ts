@@ -19,6 +19,7 @@ export interface IOrganization {
     address: NewAddress;
     rating: Number;
     tenderInvitations?: Types.ObjectId[];
+    profilePhoto?: string;
     createdAt: Date;
     updatedAt: Date;
 }
