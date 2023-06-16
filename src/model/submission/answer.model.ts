@@ -2,7 +2,7 @@ import { Document, Model } from 'mongoose';
 export interface IAnswer {
     id: string;
     questionId: string;
-    answer: string;
+    answer: string
     mark: number;
 }
 export interface IAnswerDoc extends IAnswer, Document {

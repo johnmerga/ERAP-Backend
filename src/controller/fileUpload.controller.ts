@@ -55,4 +55,22 @@ export class FileUploadController {
             }
         });
 
+    // downloadable file
+    downloadFile = catchAsync(
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const { filename } = req.params;
+                const filePath = path.join(__dirname, '../../uploads', filename);
+                res.download(filePath, filename, (err) => {
+                    if (err) {
+                        throw new ApiError(httpStatus.BAD_REQUEST, 'system error while downloading file');
+                    }
+                })
+
+            } catch (error) {
+                if (error instanceof ApiError) throw error;
+                throw new ApiError(httpStatus.BAD_REQUEST, 'system error while downloading file');
+            }
+        })
+
 }

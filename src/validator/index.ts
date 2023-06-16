@@ -26,3 +26,5 @@ export * as notificationValidator from './notification.validator';
 export * as permissionValidator from './permission.validator';
 // chat validator
 export * as chatValidator from './chat.validator';
+// file upload validator
+export * as fileUploadValidator from './file.validator';
