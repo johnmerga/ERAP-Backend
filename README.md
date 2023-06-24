@@ -9,19 +9,19 @@
 <h1 align="center">Erap Backend</h1>
 
 <p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/johnmerga/erap-backend?color=56BEB8">
+  <img alt="Github top language" src="https://img.shields.io/github/languages/top/johnmerga/ERAP-Backend?color=56BEB8">
 
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/johnmerga/erap-backend?color=56BEB8">
+  <img alt="Github language count" src="https://img.shields.io/github/languages/count/johnmerga/ERAP-Backend?color=56BEB8">
 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/johnmerga/erap-backend?color=56BEB8">
+  <img alt="Repository size" src="https://img.shields.io/github/repo-size/johnmerga/ERAP-Backend?color=56BEB8">
 
-  <img alt="License" src="https://img.shields.io/github/license/johnmerga/erap-backend?color=56BEB8">
+  <img alt="License" src="https://img.shields.io/github/license/johnmerga/ERAP-Backend?color=56BEB8">
 
-  <!-- <img alt="Github issues" src="https://img.shields.io/github/issues/johnmerga/erap-backend?color=56BEB8" /> -->
+  <!-- <img alt="Github issues" src="https://img.shields.io/github/issues/johnmerga/ERAP-Backend?color=56BEB8" /> -->
 
-  <!-- <img alt="Github forks" src="https://img.shields.io/github/forks/johnmerga/erap-backend?color=56BEB8" /> -->
+  <!-- <img alt="Github forks" src="https://img.shields.io/github/forks/johnmerga/ERAP-Backend?color=56BEB8" /> -->
 
-  <!-- <img alt="Github stars" src="https://img.shields.io/github/stars/johnmerga/erap-backend?color=56BEB8" /> -->
+  <!-- <img alt="Github stars" src="https://img.shields.io/github/stars/johnmerga/ERAP-Backend?color=56BEB8" /> -->
 </p>
 
 <!-- Status -->
@@ -76,13 +76,13 @@ Before starting , you need to have
 
 ```bash
 # Clone this project
-$ git clone https://github.com/johnmerga/erap-backend
+$ git clone https://github.com/johnmerga/ERAP-Backend
 
 # install typescript globally if it's not installed
 $ npm install -g typescript
 
 # Access
-$ cd erap-backend
+$ cd ERAP-Backend
 
 # create .env file
 $ cp .env.example .env
